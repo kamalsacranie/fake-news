@@ -1,6 +1,6 @@
 const devData = require("../data/development-data/index.js");
 const seed = require("./seed.js");
-const db = require("../connection.js");
+const db = require("../");
 
 export default function runSeed() {
   return seed(process.env.NODE_ENV ? testData : devData);
