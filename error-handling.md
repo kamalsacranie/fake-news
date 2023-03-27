@@ -1,11 +1,17 @@
 # Possible Errors
 
-This is an _**incomplete**_ guide to the possible errors that may happen in your app. We have left some of them blank to prompt you to think about the errors that could occur as a client uses each endpoint that you have created.
+This is an _**incomplete**_ guide to the possible errors that may happen in your
+app. We have left some of them blank to prompt you to think about the errors
+that could occur as a client uses each endpoint that you have created.
 
-Think about what could go wrong for each route, and the HTTP status code should be sent to the client in each case.
-For each thing that could go wrong, make a test with your expected status code and then make sure that possibility is handled.
+Think about what could go wrong for each route, and the HTTP status code should
+be sent to the client in each case. For each thing that could go wrong, make a
+test with your expected status code and then make sure that possibility is
+handled.
 
-Bear in mind, handling bad inputs from clients doesn't necessarily have to lead to a 4\*\* status code. Handling can include using default behaviours or even ignoring parts of the request.
+Bear in mind, handling bad inputs from clients doesn't necessarily have to lead
+to a 4\*\* status code. Handling can include using default behaviours or even
+ignoring parts of the request.
 
 ---
 
@@ -31,7 +37,7 @@ Bear in mind, handling bad inputs from clients doesn't necessarily have to lead 
 
 ### GET `/not-a-route`
 
-- Status: ???
+- Status: 404 (this applies to all following routes)
 
 ---
 
@@ -39,7 +45,9 @@ Bear in mind, handling bad inputs from clients doesn't necessarily have to lead 
 
 ### GET `/api/topics`
 
--
+- Status 404:
+  - Table does not exist in our database
+  - Table does not have any entries
 
 ### GET `/api/users/:username`
 
