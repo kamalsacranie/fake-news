@@ -1,10 +1,10 @@
 const { responseRowsOr404 } = require("./utils");
 const db = require("../db");
 
-exports.fetchArticle = async (article_id) => {
+exports.fetchArticle = async (articleId) => {
   const query = await db.query(
     `SELECT * FROM articles WHERE article_id = $1;`,
-    [article_id]
+    [articleId]
   );
   return responseRowsOr404(query, "article not found");
 };
@@ -21,5 +21,18 @@ exports.fetchArticles = async () => {
   return responseRowsOr404(
     query,
     "the articles table currently contains no articles"
+  );
+};
+
+exports.fetchArticleComments = async (articleId) => {
+  const query = await db.query(
+    `
+      SELECT * FROM comments WHERE comments.article_id = $1
+    `,
+    [articleId]
+  );
+  return responseRowsOr404(
+    query,
+    "there are no comments associated with this article"
   );
 };
