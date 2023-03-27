@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres
+    container_name: mitch-rare-treas
+    environment:
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+    working_dir: /app
+    ports:
+      - "5432:${PGPORT}"
+    volumes:
+      - .:/app
+      - ./db/setup.sql:/docker-entrypoint-initdb.d/setup.sql # automatically runs our sql script on compose
+    restart: always
