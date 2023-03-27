@@ -6,5 +6,5 @@ exports.fetchArticle = async (article_id) => {
     `SELECT * FROM articles WHERE article_id = $1;`,
     [article_id]
   );
-  return responseRowsOr404(query);
+  return responseRowsOr404(query, "article not found");
 };

@@ -1,9 +1,11 @@
 const { fetchArticle } = require("../models/articles");
 
 exports.getArticle = async (req, res, next) => {
-  const { articleId } = req.params;
-  console.log(req.params);
-  const [article] = await fetchArticle(articleId);
-  console.log(article);
-  res.status(200).send({ article });
+  try {
+    const { articleId } = req.params;
+    const [article] = await fetchArticle(articleId);
+    res.status(200).send({ article });
+  } catch (err) {
+    next(err);
+  }
 };
