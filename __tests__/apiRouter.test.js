@@ -4,7 +4,7 @@ const request = require("supertest");
 const app = require("../src/app");
 
 beforeEach(() => {
-  return runSeed(); // this is where the dynamic runseed function is nice
+  return runSeed();
 });
 afterAll(() => {
   db.end();

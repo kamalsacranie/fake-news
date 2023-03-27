@@ -54,6 +54,7 @@ describe("GET to /api/topics", () => {
     it("Should return 404 if no topics are in the table", async () => {
       await db.query(`TRUNCATE TABLE topics CASCADE;`);
       await request(app).get("/api/topics").expect(404);
+      await runSeed();
     });
     it("Should return the error message 'currently no topics in the database'", async () => {
       await db.query(`TRUNCATE TABLE topics CASCADE;`);
@@ -61,6 +62,7 @@ describe("GET to /api/topics", () => {
         body: { message },
       } = await request(app).get("/api/topics").expect(404);
       expect(message).toBe("currently no topics in the database");
+      await runSeed();
     });
   });
 });
