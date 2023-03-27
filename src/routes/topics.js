@@ -1,19 +1,11 @@
 const express = require("express");
 const { getTopics } = require("../controllers/topics");
+const { sqlError } = require("./errors");
 
 const topicsRouter = express.Router();
 
 topicsRouter.get("/", getTopics);
 
-topicsRouter.use((err, req, res, next) => {
-  if (err.code) {
-    res.status(404).send({
-      code: err.code,
-      message: "our database does not have a topics table",
-    });
-  } else {
-    next(err);
-  }
-});
+topicsRouter.use(sqlError("our database does not have a topics table"));
 
 module.exports = topicsRouter;
