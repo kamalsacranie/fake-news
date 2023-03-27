@@ -38,22 +38,12 @@ describe("GET to /api/topics", () => {
     });
   });
   describe("Sad path", () => {
-    it("Should return 404 if no table is not in database", async () => {
-      await db.query(`DROP TABLE IF EXISTS topics CASCADE;`);
-      await request(app).get("/api/topics").expect(404);
-      await runSeed();
-    });
     it("Should return the error message 'our database does not have a topics table'", async () => {
       await db.query(`DROP TABLE IF EXISTS topics CASCADE;`);
       const {
         body: { message },
       } = await request(app).get("/api/topics").expect(404);
       expect(message).toBe("our database does not have a topics table");
-      await runSeed();
-    });
-    it("Should return 404 if no topics are in the table", async () => {
-      await db.query(`TRUNCATE TABLE topics CASCADE;`);
-      await request(app).get("/api/topics").expect(404);
       await runSeed();
     });
     it("Should return the error message 'currently no topics in the database'", async () => {
