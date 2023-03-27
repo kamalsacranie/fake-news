@@ -20,7 +20,10 @@ describe("GET to /api/topics", () => {
         body: { topics },
       } = await request(app).get("/api/topics").expect(200);
       expect(topics).toBeInstanceOf(Array);
-      expect(topics[0]).toBeInstanceOf(Object);
+      expect(topics.length).not.toBe(0);
+      topics.forEach((topic) => {
+        expect(topic).toBeInstanceOf(Object);
+      });
     });
     it("Objects in response should match the structure of a topic object", async () => {
       const {
@@ -42,7 +45,10 @@ describe("GET to /api/topics", () => {
     });
     it("Should return the error message 'our database does not have a topics table'", async () => {
       await db.query(`DROP TABLE IF EXISTS topics CASCADE;`);
-      await request(app).get("/api/topics").expect(404);
+      const {
+        body: { message },
+      } = await request(app).get("/api/topics").expect(404);
+      expect(message).toBe("our database does not have a topics table");
       await runSeed();
     });
     it("Should return 404 if no topics are in the table", async () => {
