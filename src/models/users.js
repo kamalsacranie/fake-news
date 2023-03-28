@@ -7,8 +7,5 @@ exports.fetchUsers = async () => {
       SELECT * FROM users;
     `
   );
-  return responseRowsOr404(
-    query,
-    "there are currently no users in the users table"
-  );
+  return responseRowsOr404(query, "currently no users in the database");
 };
