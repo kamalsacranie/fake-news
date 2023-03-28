@@ -43,7 +43,7 @@ describe("GET /api/articles/:article_id", () => {
       const {
         body: { message },
       } = await request(app).get("/api/articles/string").expect(400);
-      expect(message).toBe("the aticle id specified is not a valid");
+      expect(message).toBe("the articleId specified is not a valid");
     });
   });
 });
@@ -76,10 +76,10 @@ describe("GET /api/articles", () => {
           article_img_url: expect.any(String || undefined),
           comment_count: expect.any(String),
         });
-        if (article.created_at) expect(new Date(article.created_at)).toBeDate();
+        if (article.created_at) expect(article.created_at).toBeDateString();
       });
     });
-    it.only("Articles should be sorted in decending order by their created_at", async () => {
+    it("Articles should be sorted in decending order by their created_at", async () => {
       const {
         body: { articles },
       } = await request(app).get("/api/articles").expect(200);
@@ -104,6 +104,64 @@ describe("GET /api/articles", () => {
       } = await request(app).get("/api/articles").expect(404);
       expect(message).toBe("the articles table currently contains no articles");
       await runSeed();
+    });
+  });
+});
+
+describe("GET /api/articles/:articleId/comments", () => {
+  describe("Happy path", () => {
+    it("should return an array of objects", async () => {
+      const {
+        body: { comments },
+      } = await request(app).get("/api/articles/1/comments").expect(200);
+      expect(comments).toBeInstanceOf(Array);
+      expect(comments).toHaveLength(11);
+    });
+    it("comments should match the comment object schema", async () => {
+      const {
+        body: { comments },
+      } = await request(app).get("/api/articles/1/comments").expect(200);
+      expect(comments).not.toHaveLength(0);
+      comments.forEach((comment) => {
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          article_id: 1,
+          body: expect.any(String),
+          author: expect.any(String),
+          created_at: expect.any(String || undefined),
+          votes: expect.any(Number),
+        });
+        if (comment.created_at) expect(comment.created_at).toBeDateString();
+      });
+    });
+    it("comments should be returned with the most recent first", async () => {
+      const {
+        body: { comments },
+      } = await request(app).get("/api/articles/1/comments").expect(200);
+      const unsortedComments = [...comments];
+      comments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      expect(unsortedComments).toEqual(comments);
+    });
+  });
+  describe("Sad path", () => {
+    it("Should return 404 if the id specified does not exists in the database", async () => {
+      const {
+        body: { message },
+      } = await request(app).get("/api/articles/1000000/comments").expect(404);
+      expect(message).toBe("article not found");
+    });
+    it("Should return 400 if the ID is specified incorrectly", async () => {
+      const {
+        body: { message },
+      } = await request(app).get("/api/articles/string/comments").expect(400);
+      expect(message).toBe("the articleId specified is not a valid");
+    });
+    it("should return an empty list if there are no comments associated with an article", async () => {
+      const {
+        body: { comments },
+      } = await request(app).get("/api/articles/2/comments").expect(200);
+      expect(comments).toBeInstanceOf(Array);
+      expect(comments).toHaveLength(0);
     });
   });
 });
