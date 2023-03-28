@@ -165,3 +165,43 @@ describe("GET /api/articles/:articleId/comments", () => {
     });
   });
 });
+
+describe("POST /api/articles/:articleId/comments", () => {
+  let comment;
+  beforeEach(() => {
+    comment = { username: "lurker", body: "new comment" };
+  });
+  describe("Happy path", () => {
+    it("should respond with a 201", async () => {
+      await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(201);
+    });
+    it("should respond with an object", async () => {
+      const {
+        body: { comment: newComment },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(201);
+      expect(newComment).toBeInstanceOf(Object);
+    });
+    it("should match the object values with the comment id", async () => {
+      const {
+        body: { comment: newComment },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(201);
+      expect(newComment).toMatchObject({
+        comment_id: 19,
+        author: comment.username,
+        body: comment.body,
+        votes: 0,
+        article_id: 1,
+        created_at: expect.any(String),
+      });
+    });
+  });
+});
