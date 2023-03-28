@@ -2,7 +2,11 @@ const {
   fetchArticle,
   fetchArticles,
   fetchArticleComments,
+<<<<<<< HEAD
   addComment,
+=======
+  updateArticle,
+>>>>>>> d1a5d39 (Finish happy path for PATCH /api/artcile/articleID)
 } = require("../models/articles");
 const { fetchUser } = require("../models/users");
 
@@ -74,6 +78,19 @@ exports.postArticleComment = async (req, res, next) => {
       fetchUser(comment.username),
     ]);
     res.status(201).send({ comment: newComment });
+  } catch (err) {
+    next(err);
+  }
+}
+
+exports.patchArticle = async (req, res, next) => {
+  const { articleId } = req.params;
+  const updates = { articleId, inc_votes: req.body.inc_votes };
+  if (!parseInt(articleId))
+    return next(new InvalidQueryParam(400, "articleId"));
+  try {
+    const article = await updateArticle(updates);
+    res.status(200).send({ article });
   } catch (err) {
     next(err);
   }
