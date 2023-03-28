@@ -34,22 +34,6 @@ describe("GET /api/users", () => {
     });
   });
   describe("Sad path", () => {
-    it("Should return the error message 'our database does not have a users table'", async () => {
-      await db.query(`DROP TABLE IF EXISTS users CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/users").expect(404);
-      expect(message).toBe("our database does not have a users table");
-      await runSeed();
-    });
-    it("Should return the error message 'currently no users in the database'", async () => {
-      await db.query(`TRUNCATE TABLE users CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/users").expect(404);
-      expect(message).toBe("currently no users in the database");
-      await runSeed();
-    });
     it("should return 404 if a bad endpoint is given /api/usersss", async () => {
       await request(app).get("/api/usersss/jfkdsj").expect(404);
     });

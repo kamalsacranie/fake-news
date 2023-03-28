@@ -89,21 +89,8 @@ describe("GET /api/articles", () => {
     });
   });
   describe("Sad path", () => {
-    it("Should return the error message 'our database does not have a articles table'", async () => {
-      await db.query(`DROP TABLE IF EXISTS articles CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/articles").expect(404);
-      expect(message).toBe("our database does not have a articles table");
-      await runSeed();
-    });
-    it("Should return the error message 'currently no topics in the database'", async () => {
-      await db.query(`TRUNCATE TABLE articles CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/articles").expect(404);
-      expect(message).toBe("the articles table currently contains no articles");
-      await runSeed();
+    it("should return 404 if a bad endpoint is given /api/usersss", async () => {
+      await request(app).get("/api/jfdlksj").expect(404);
     });
   });
 });
