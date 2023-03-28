@@ -37,7 +37,10 @@ exports.getArticleComments = async (req, res, next) => {
   if (!parseInt(articleId))
     return next(new InvalidQueryParam(400, "articleId"));
   try {
-    const comments = await fetchArticleComments(articleId);
+    const [comments] = await Promise.all([
+      fetchArticleComments(articleId),
+      fetchArticle(articleId),
+    ]);
     res.status(200).send({ comments });
   } catch (err) {
     next(err);

@@ -26,14 +26,11 @@ exports.fetchArticles = async () => {
 };
 
 exports.fetchArticleComments = async (articleId) => {
-  const query = await db.query(
+  const { rows } = await db.query(
     `
-      SELECT * FROM comments WHERE comments.article_id = $1
+      SELECT * FROM comments WHERE comments.article_id = $1 ORDER BY comments.created_at DESC
     `,
     [articleId]
   );
-  return responseRowsOr404(
-    query,
-    "there are no comments associated with this article"
-  );
+  return rows;
 };
