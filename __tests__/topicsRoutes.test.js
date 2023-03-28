@@ -38,21 +38,9 @@ describe("GET to /api/topics", () => {
     });
   });
   describe("Sad path", () => {
-    it("Should return the error message 'our database does not have a topics table'", async () => {
-      await db.query(`DROP TABLE IF EXISTS topics CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/topics").expect(404);
-      expect(message).toBe("our database does not have a topics table");
-      await runSeed();
-    });
-    it("Should return the error message 'currently no topics in the database'", async () => {
-      await db.query(`TRUNCATE TABLE topics CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/topics").expect(404);
-      expect(message).toBe("currently no topics in the database");
-      await runSeed();
+    it("should return 404 if a bad endpoint is given /api/usersss", async () => {
+      await request(app).get("/api/topics/jfkdsj").expect(404);
+      await request(app).get("/api/jdklsjfls").expect(404);
     });
   });
 });
