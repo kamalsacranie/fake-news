@@ -53,17 +53,17 @@ describe("GET /api/articles", () => {
     it("should return a 200", async () => {
       await request(app).get("/api/articles").expect(200);
     });
-    it("should return an array of objects", async () => {
+    it("should return an array", async () => {
       const {
         body: { articles },
       } = await request(app).get("/api/articles").expect(200);
       expect(articles).toBeInstanceOf(Array);
-      expect(articles).not.toHaveLength(0);
     });
     it("should return a list of objects that match the article schema", async () => {
       const {
         body: { articles },
       } = await request(app).get("/api/articles").expect(200);
+      expect(articles).not.toHaveLength(0);
       articles.forEach((article) => {
         expect(article).toMatchObject({
           author: expect.any(String),
@@ -76,7 +76,16 @@ describe("GET /api/articles", () => {
           article_img_url: expect.any(String || undefined),
           comment_count: expect.any(String),
         });
+        if (article.created_at) expect(new Date(article.created_at)).toBeDate();
       });
+    });
+    it.only("Articles should be sorted in decending order by their created_at", async () => {
+      const {
+        body: { articles },
+      } = await request(app).get("/api/articles").expect(200);
+      const unsortedArticles = [...articles];
+      articles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      expect(unsortedArticles).toEqual(articles);
     });
   });
   describe("Sad path", () => {
