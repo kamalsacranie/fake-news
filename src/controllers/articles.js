@@ -4,6 +4,7 @@ const {
   fetchArticleComments,
   addComment,
 } = require("../models/articles");
+const { fetchUser } = require("../models/users");
 
 class InvalidQueryParam {
   constructor(status, queryParamName) {
@@ -68,7 +69,10 @@ exports.postArticleComment = async (req, res, next) => {
   if (Object.values(comment).includes(undefined))
     return next(new InvalidPostObject());
   try {
-    const newComment = await addComment(comment);
+    const [newComment] = await Promise.all([
+      addComment(comment),
+      fetchUser(comment.username),
+    ]);
     res.status(201).send({ comment: newComment });
   } catch (err) {
     next(err);

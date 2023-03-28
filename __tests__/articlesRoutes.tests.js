@@ -187,6 +187,16 @@ describe("POST /api/articles/:articleId/comments", () => {
     });
   });
   describe("Sad path", () => {
+    it("Random username should not be allowed to POST", async () => {
+      const comment = { username: "notauser", body: "new comment" };
+      const {
+        body: { message },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(400);
+      expect(message).toBe("username did not match a valid user");
+    });
     it("Should return 400 if the ID is specified incorrectly", async () => {
       const {
         body: { message },
