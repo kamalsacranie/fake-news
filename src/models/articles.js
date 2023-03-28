@@ -49,9 +49,7 @@ exports.addComment = ({ commentBody, articleId, username }) => {
 };
 
 exports.updateArticle = async ({ articleId, inc_votes }) => {
-  const {
-    rows: [updatedArticle],
-  } = await db.query(
+  const query = await db.query(
     `
       UPDATE articles
       SET votes = votes + $1
@@ -60,5 +58,7 @@ exports.updateArticle = async ({ articleId, inc_votes }) => {
     `,
     [inc_votes, articleId]
   );
-  return updatedArticle;
+  const result = responseRowsOr404(query, "article not found");
+  if (Array.isArray(result)) return result[0];
+  return result;
 };
