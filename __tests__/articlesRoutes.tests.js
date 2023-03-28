@@ -47,3 +47,63 @@ describe("GET /api/articles/:article_id", () => {
     });
   });
 });
+
+describe("GET /api/articles", () => {
+  describe("Happy path", () => {
+    it("should return a 200", async () => {
+      await request(app).get("/api/articles").expect(200);
+    });
+    it("should return an array", async () => {
+      const {
+        body: { articles },
+      } = await request(app).get("/api/articles").expect(200);
+      expect(articles).toBeInstanceOf(Array);
+    });
+    it("should return a list of objects that match the article schema", async () => {
+      const {
+        body: { articles },
+      } = await request(app).get("/api/articles").expect(200);
+      expect(articles).not.toHaveLength(0);
+      articles.forEach((article) => {
+        expect(article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: expect.any(Number),
+          body: expect.any(String),
+          topic: expect.any(String),
+          created_at: expect.any(String || undefined),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String || undefined),
+          comment_count: expect.any(String),
+        });
+        if (article.created_at) expect(new Date(article.created_at)).toBeDate();
+      });
+    });
+    it.only("Articles should be sorted in decending order by their created_at", async () => {
+      const {
+        body: { articles },
+      } = await request(app).get("/api/articles").expect(200);
+      const unsortedArticles = [...articles];
+      articles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      expect(unsortedArticles).toEqual(articles);
+    });
+  });
+  describe("Sad path", () => {
+    it("Should return the error message 'our database does not have a articles table'", async () => {
+      await db.query(`DROP TABLE IF EXISTS articles CASCADE;`);
+      const {
+        body: { message },
+      } = await request(app).get("/api/articles").expect(404);
+      expect(message).toBe("our database does not have a articles table");
+      await runSeed();
+    });
+    it("Should return the error message 'currently no topics in the database'", async () => {
+      await db.query(`TRUNCATE TABLE articles CASCADE;`);
+      const {
+        body: { message },
+      } = await request(app).get("/api/articles").expect(404);
+      expect(message).toBe("the articles table currently contains no articles");
+      await runSeed();
+    });
+  });
+});
