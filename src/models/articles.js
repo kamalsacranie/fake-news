@@ -34,3 +34,16 @@ exports.fetchArticleComments = async (articleId) => {
   );
   return rows;
 };
+
+exports.addComment = ({ commentBody, articleId, username }) => {
+  return db
+    .query(
+      `
+          INSERT INTO comments (body, article_id, author)
+          VALUES ($1, $2, $3)
+          RETURNING *;
+        `,
+      [commentBody, articleId, username]
+    )
+    .then(({ rows: [newComment] }) => newComment);
+};

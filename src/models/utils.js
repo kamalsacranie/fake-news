@@ -1,3 +1,12 @@
+exports.responseRowsOrError = ({ rows }, status, messageIfNoRows) => {
+  if (!rows.length)
+    return Promise.reject({
+      status: status,
+      message: messageIfNoRows,
+    });
+  return rows;
+};
+
 exports.responseRowsOr404 = ({ rows }, messageIfNoRows) => {
   if (!rows.length)
     return Promise.reject({

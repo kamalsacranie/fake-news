@@ -88,11 +88,6 @@ describe("GET /api/articles", () => {
       expect(unsortedArticles).toEqual(articles);
     });
   });
-  describe("Sad path", () => {
-    it("should return 404 if a bad endpoint is given /api/usersss", async () => {
-      await request(app).get("/api/jfdlksj").expect(404);
-    });
-  });
 });
 
 describe("GET /api/articles/:articleId/comments", () => {
@@ -149,6 +144,93 @@ describe("GET /api/articles/:articleId/comments", () => {
       } = await request(app).get("/api/articles/2/comments").expect(200);
       expect(comments).toBeInstanceOf(Array);
       expect(comments).toHaveLength(0);
+    });
+  });
+});
+
+describe("POST /api/articles/:articleId/comments", () => {
+  describe("Happy path", () => {
+    let comment;
+    beforeEach(() => {
+      comment = { username: "lurker", body: "new comment" };
+    });
+    it("should respond with a 201", async () => {
+      await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(201);
+    });
+    it("should respond with an object", async () => {
+      const {
+        body: { comment: newComment },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(201);
+      expect(newComment).toBeInstanceOf(Object);
+    });
+    it("should match the object values with the comment id", async () => {
+      const {
+        body: { comment: newComment },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(201);
+      expect(newComment).toMatchObject({
+        comment_id: 19,
+        author: comment.username,
+        body: comment.body,
+        votes: 0,
+        article_id: 1,
+        created_at: expect.any(String),
+      });
+    });
+  });
+  describe("Sad path", () => {
+    it("Random username should not be allowed to POST", async () => {
+      const comment = { username: "notauser", body: "new comment" };
+      const {
+        body: { message },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(400);
+      expect(message).toBe("username did not match a valid user");
+    });
+    it("Should return 400 if the ID is specified incorrectly", async () => {
+      const {
+        body: { message },
+      } = await request(app).post("/api/articles/string/comments").expect(400);
+      expect(message).toBe("the articleId specified is not a valid");
+    });
+    it("should return a 400 if incorrectly structured object is passed in", async () => {
+      const comment = {
+        body: "jfdslkjk",
+      };
+      await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(400);
+    });
+    it("should return the message 'bad POST request' when a bad object is given", async () => {
+      const comment = {
+        body: "jfdslkjk",
+      };
+      const {
+        body: { message },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(400);
+      expect(message).toBe("bad POST request");
+    });
+    it("should alert the user if they send a comment to an article that doesn't exist", async () => {
+      const comment = { username: "lurker", body: "new comment" };
+      const { body } = await request(app)
+        .post("/api/articles/999/comments")
+        .send(comment)
+        .expect(404);
+      expect(body.message).toBe("article not found");
     });
   });
 });
