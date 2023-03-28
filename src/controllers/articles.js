@@ -2,6 +2,7 @@ const {
   fetchArticle,
   fetchArticles,
   fetchArticleComments,
+  addComment,
 } = require("../models/articles");
 
 class InvalidQueryParam {
@@ -9,6 +10,19 @@ class InvalidQueryParam {
     this.status = status;
     this.message = `the ${queryParamName} specified is not a valid`;
   }
+}
+
+function articleRoute(callback) {
+  return async (req, res, next) => {
+    const { articleId } = req.params;
+    if (!parseInt(articleId))
+      return next(new InvalidQueryParam(400, "articleId"));
+    try {
+      callback(req, res, articleId);
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 exports.getArticle = async (req, res, next) => {
@@ -46,3 +60,8 @@ exports.getArticleComments = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.postArticleComment = articleRoute(async (req, res, articleId) => {
+  const [newComment] = await addComment({ articleId, ...req.body });
+  res.status(201).send({ comment: newComment });
+});

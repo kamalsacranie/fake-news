@@ -34,3 +34,15 @@ exports.fetchArticleComments = async (articleId) => {
   );
   return rows;
 };
+
+exports.addComment = async ({ articleId, username, body }) => {
+  const { rows } = await db.query(
+    `
+      INSERT INTO comments (body, article_id, author)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `,
+    [body, articleId, username]
+  );
+  return rows;
+};
