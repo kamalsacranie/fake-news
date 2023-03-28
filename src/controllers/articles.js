@@ -12,18 +12,14 @@ class InvalidQueryParam {
   }
 }
 
-function articleRoute(callback) {
-  return async (req, res, next) => {
-    const { articleId } = req.params;
-    if (!parseInt(articleId))
-      return next(new InvalidQueryParam(400, "articleId"));
-    try {
-      callback(req, res, articleId);
-    } catch (err) {
-      next(err);
-    }
-  };
+class InvalidPostObject {
+  constructor() {
+    this.status = 400;
+    this.message = `bad POST request`;
+  }
 }
+
+function articleRoute(callback) {}
 
 exports.getArticle = async (req, res, next) => {
   const { articleId } = req.params;
@@ -61,7 +57,20 @@ exports.getArticleComments = async (req, res, next) => {
   }
 };
 
-exports.postArticleComment = articleRoute(async (req, res, articleId) => {
-  const [newComment] = await addComment({ articleId, ...req.body });
-  res.status(201).send({ comment: newComment });
-});
+exports.postArticleComment = async (req, res, next) => {
+  const articleId = parseInt(req.params.articleId);
+  if (!articleId) return next(new InvalidQueryParam(400, "articleId"));
+  const comment = {
+    articleId,
+    commentBody: req.body.body,
+    username: req.body.username,
+  };
+  if (Object.values(comment).includes(undefined))
+    return next(new InvalidPostObject());
+  try {
+    const newComment = await addComment(comment);
+    res.status(201).send({ comment: newComment });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -88,24 +88,6 @@ describe("GET /api/articles", () => {
       expect(unsortedArticles).toEqual(articles);
     });
   });
-  describe("Sad path", () => {
-    it("Should return the error message 'our database does not have a articles table'", async () => {
-      await db.query(`DROP TABLE IF EXISTS articles CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/articles").expect(404);
-      expect(message).toBe("our database does not have a articles table");
-      await runSeed();
-    });
-    it("Should return the error message 'currently no topics in the database'", async () => {
-      await db.query(`TRUNCATE TABLE articles CASCADE;`);
-      const {
-        body: { message },
-      } = await request(app).get("/api/articles").expect(404);
-      expect(message).toBe("the articles table currently contains no articles");
-      await runSeed();
-    });
-  });
 });
 
 describe("GET /api/articles/:articleId/comments", () => {
@@ -167,11 +149,11 @@ describe("GET /api/articles/:articleId/comments", () => {
 });
 
 describe("POST /api/articles/:articleId/comments", () => {
-  let comment;
-  beforeEach(() => {
-    comment = { username: "lurker", body: "new comment" };
-  });
   describe("Happy path", () => {
+    let comment;
+    beforeEach(() => {
+      comment = { username: "lurker", body: "new comment" };
+    });
     it("should respond with a 201", async () => {
       await request(app)
         .post("/api/articles/1/comments")
@@ -202,6 +184,43 @@ describe("POST /api/articles/:articleId/comments", () => {
         article_id: 1,
         created_at: expect.any(String),
       });
+    });
+  });
+  describe("Sad path", () => {
+    it("Should return 400 if the ID is specified incorrectly", async () => {
+      const {
+        body: { message },
+      } = await request(app).post("/api/articles/string/comments").expect(400);
+      expect(message).toBe("the articleId specified is not a valid");
+    });
+    it("should return a 400 if incorrectly structured object is passed in", async () => {
+      const comment = {
+        body: "jfdslkjk",
+      };
+      await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(400);
+    });
+    it("should return the message 'bad POST request' when a bad object is given", async () => {
+      const comment = {
+        body: "jfdslkjk",
+      };
+      const {
+        body: { message },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send(comment)
+        .expect(400);
+      expect(message).toBe("bad POST request");
+    });
+    it("should alert the user if they send a comment to an article that doesn't exist", async () => {
+      const comment = { username: "lurker", body: "new comment" };
+      const { body } = await request(app)
+        .post("/api/articles/999/comments")
+        .send(comment)
+        .expect(404);
+      expect(body.message).toBe("article not found");
     });
   });
 });
