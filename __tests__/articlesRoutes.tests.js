@@ -158,13 +158,12 @@ describe("GET /api/articles", () => {
       });
     });
     describe("Sad path", () => {
-      it("should return an empty array when given a topic with no entries", async () => {
+      it("should return a 404 when given a topic that does not exist", async () => {
         const {
           body: { articles },
         } = await request(app)
           .get("/api/articles?topic=jfdksjlkfj")
-          .expect(200);
-        expect(articles).toHaveLength(0);
+          .expect(404);
       });
       it("should do nothing different if passed an incorrect value for oder query", async () => {
         const {
