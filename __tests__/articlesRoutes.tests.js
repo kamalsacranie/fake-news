@@ -158,36 +158,32 @@ describe("GET /api/articles", () => {
       });
     });
     describe("Sad path", () => {
-      it("should return a 404 when given a topic that does not exist", async () => {
+      it("should return a 400 when given a topic that does not exist", async () => {
         const {
           body: { articles },
         } = await request(app)
           .get("/api/articles?topic=jfdksjlkfj")
-          .expect(404);
+          .expect(400);
       });
-      it("should do nothing different if passed an incorrect value for oder query", async () => {
+      it("Should return an empty array when given a topic that has no articles associated", async () => {
+        const {
+          body: { articles },
+        } = await request(app).get("/api/articles?topic=paper").expect(200);
+        expect(articles).toHaveLength(0);
+      });
+      it("should return 400 if order value is incorrect", async () => {
         const {
           body: { articles },
         } = await request(app)
           .get("/api/articles?order=jfdksjlkfj")
-          .expect(200);
-        const unsortedArticles = [...articles];
-        articles.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-        expect(unsortedArticles).toEqual(articles);
+          .expect(400);
       });
-      it("should do nothing different if passed an incorrect value for sort_by query", async () => {
+      it("should return 400 if sort_by query is incorrect", async () => {
         const {
           body: { articles },
         } = await request(app)
           .get("/api/articles?sort_by=jfdksjlkfj")
-          .expect(200);
-        const unsortedArticles = [...articles];
-        articles.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-        expect(unsortedArticles).toEqual(articles);
+          .expect(400);
       });
       it("should do nothing different if random queries are passed in", async () => {
         const {
