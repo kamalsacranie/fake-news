@@ -4,8 +4,8 @@ const {
   fetchArticleComments,
   addComment,
   updateArticle,
-  fetchTopics,
 } = require("../models/articles");
+const { fetchTopics } = require("../models/topics");
 const { InvalidQueryParam, InvalidPostObject } = require("./errorStatus");
 const { fetchUser } = require("../models/users");
 
@@ -25,14 +25,14 @@ exports.getArticles = async (req, res, next) => {
   let { topic, sort_by, order } = req.query;
 
   if (topic) {
-    const topicArray = await fetchTopics();
-    topic =
-      topic && topicArray.includes(topic)
-        ? topic
-        : next({ status: 404, message: "this topic does not exist" });
+    const topicArray = await fetchTopics().then((topics) =>
+      topics.map((topic) => topic.slug)
+    );
+    if (!topicArray.includes(topic))
+      return next({ status: 400, message: "this topic does not exist" });
   }
 
-  sort_by = [
+  const columns = [
     "article_id",
     "title",
     "topic",
@@ -40,11 +40,13 @@ exports.getArticles = async (req, res, next) => {
     "body",
     "votes",
     "article_image_url",
-  ].includes(sort_by)
-    ? sort_by
-    : undefined;
+  ];
+  if (!(columns.includes(sort_by) || !sort_by))
+    return next({ status: 400, message: "invalid sort_by argument" });
 
-  order = order && order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+  order = order ? order.toUpperCase() : "DESC";
+  if (!["ASC", "DESC"].includes(order))
+    return next({ status: 400, message: "invalid order argument" });
 
   try {
     const articles = await fetchArticles(topic, sort_by, order);

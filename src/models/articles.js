@@ -1,4 +1,4 @@
-const { responseRowsOr404 } = require("./utils");
+const { responseRowsOr404, responseRowsOrError } = require("./utils");
 const db = require("../db");
 
 exports.fetchArticle = async (articleId) => {
@@ -20,6 +20,8 @@ exports.fetchArticles = async (topic, sort_by, order) => {
       ORDER BY articles.${sort_by ? sort_by : "created_at"} ${order};
     `
   );
+  // feels like this should be in the controller but then retunr with the resopnserowsor404 would need to be moved to the controller ffs
+  if (topic) return query.rows;
   return responseRowsOr404(
     query,
     "the articles table currently contains no articles"
@@ -62,12 +64,4 @@ exports.updateArticle = async ({ articleId, inc_votes }) => {
   const result = responseRowsOr404(query, "article not found");
   if (Array.isArray(result)) return result[0];
   return result;
-};
-
-exports.fetchTopics = async () => {
-  const { rows } = await db.query({
-    text: `SELECT DISTINCT topic FROM articles`,
-    rowMode: "array",
-  });
-  return rows.flat();
 };
