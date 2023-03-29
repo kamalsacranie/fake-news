@@ -4,6 +4,7 @@ const {
   fetchArticleComments,
   addComment,
   updateArticle,
+  fetchTopics,
 } = require("../models/articles");
 const { InvalidQueryParam, InvalidPostObject } = require("./errorStatus");
 const { fetchUser } = require("../models/users");
@@ -21,7 +22,30 @@ exports.getArticle = async (req, res, next) => {
 };
 
 exports.getArticles = async (req, res, next) => {
-  const { topic, sort_by, order } = req.query;
+  let { topic, sort_by, order } = req.query;
+
+  if (topic) {
+    const topicArray = await fetchTopics();
+    topic =
+      topic && topicArray.includes(topic)
+        ? topic
+        : res.status(200).send({ articles: [] });
+  }
+
+  sort_by = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "body",
+    "votes",
+    "article_image_url",
+  ].includes(sort_by)
+    ? sort_by
+    : undefined;
+
+  order = order && order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
   try {
     const articles = await fetchArticles(topic, sort_by, order);
     res.status(200).send({ articles });
@@ -77,7 +101,6 @@ exports.patchArticle = async (req, res, next) => {
     const article = await updateArticle(updates);
     res.status(200).send({ article });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
