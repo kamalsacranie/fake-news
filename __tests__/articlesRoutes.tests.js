@@ -106,6 +106,63 @@ describe("GET /api/articles", () => {
       expect(unsortedArticles).toEqual(articles);
     });
   });
+  describe("Query parameters", () => {
+    describe("Happy path", () => {
+      it("should filter articles by topic when topic query is given", async () => {
+        const {
+          body: { articles },
+        } = await request(app).get("/api/articles?topic=mitch").expect(200);
+        expect(articles).toHaveLength(11);
+        articles.forEach((article) => expect(article.topic).toBe("mitch"));
+      });
+      it("should sort artciles by the given query parameter", async () => {
+        const {
+          body: { articles },
+        } = await request(app)
+          .get("/api/articles?sort_by=article_id")
+          .expect(200);
+        const unsortedArticles = [...articles];
+        expect(unsortedArticles).toEqual(
+          articles.sort((a, b) => a.article_id + b.article_id)
+        );
+      });
+      it("should sort by ascending or descending if given the query parameter", async () => {
+        const {
+          body: { articles },
+        } = await request(app).get("/api/articles?order=desc").expect(200);
+        const unsortedArticles = [...articles];
+        expect(unsortedArticles).toEqual(
+          articles.sort(
+            (a, b) => new Date(b.created_at) - new Date(a.created_at)
+          )
+        );
+
+        const {
+          body: { articles: articles2 },
+        } = await request(app).get("/api/articles?order=asc").expect(200);
+        const unsortedArticles2 = [...articles2];
+        expect(unsortedArticles2).toEqual(articles.reverse());
+      });
+      it("should do all the query params at once 🤪", async () => {
+        const {
+          body: { articles },
+        } = await request(app)
+          .get("/api/articles?topic=mitch&sort_by=article_id&order=asc")
+          .expect(200);
+        expect(
+          articles.every((article, i, arr) => {
+            return i === 0 || article.article_id > arr[i - 1].article_id;
+          })
+        ).toBe(true);
+        articles.forEach((article) => expect(article.topic).toBe("mitch"));
+      });
+    });
+    describe("Sad path", () => {
+      it("should return an empty array when given a topic with no entries", async () => {});
+      it("should do nothing different if passed an incorrect value for oder query", async () => {});
+      it("should do nothing different if passed an incorrect value for sort_by query", async () => {});
+    });
+  });
 });
 
 describe("GET /api/articles/:articleId/comments", () => {
