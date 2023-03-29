@@ -70,11 +70,3 @@ exports.updateArticle = async ({ articleId, inc_votes }) => {
   if (Array.isArray(result)) return result[0];
   return result;
 };
-
-exports.fetchTopics = async () => {
-  const { rows } = await db.query({
-    text: `SELECT DISTINCT topic FROM articles`,
-    rowMode: "array",
-  });
-  return rows.flat();
-};
