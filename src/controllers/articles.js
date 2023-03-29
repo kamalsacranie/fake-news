@@ -4,6 +4,7 @@ const {
   fetchArticleComments,
   addComment,
   updateArticle,
+  fetchTopics,
 } = require("../models/articles");
 const { fetchTopics } = require("../models/topics");
 const { InvalidQueryParam, InvalidPostObject } = require("./errorStatus");
