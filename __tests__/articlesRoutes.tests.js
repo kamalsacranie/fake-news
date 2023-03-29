@@ -195,7 +195,7 @@ describe("POST /api/articles/:articleId/comments", () => {
         .post("/api/articles/1/comments")
         .send(comment)
         .expect(400);
-      expect(message).toBe("username did not match a valid user");
+      expect(message).toBe("unknown user");
     });
     it("Should return 400 if the ID is specified incorrectly", async () => {
       const {
