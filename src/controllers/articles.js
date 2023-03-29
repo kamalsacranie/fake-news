@@ -29,7 +29,7 @@ exports.getArticles = async (req, res, next) => {
     topic =
       topic && topicArray.includes(topic)
         ? topic
-        : res.status(200).send({ articles: [] });
+        : next({ status: 404, message: "this topic does not exist" });
   }
 
   sort_by = [
