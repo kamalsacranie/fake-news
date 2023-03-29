@@ -29,6 +29,24 @@ describe("GET /api/articles/:article_id", () => {
         votes: 100,
         article_img_url:
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        comment_count: "11",
+      });
+    });
+    it("shouold return a object matching the article schema where comment_count is 0 if the artilce has no comments", async () => {
+      const {
+        body: { article },
+      } = await request(app).get("/api/articles/2").expect(200);
+      expect(article).toMatchObject({
+        title: "Sony Vaio; or, The Laptop",
+        topic: "mitch",
+        author: "icellusedkars",
+        article_id: 2,
+        body: expect.any(String),
+        created_at: "2020-10-16T05:03:00.000Z",
+        votes: 0,
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        comment_count: "0",
       });
     });
   });
