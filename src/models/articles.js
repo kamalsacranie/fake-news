@@ -22,9 +22,7 @@ exports.fetchArticles = async (topic, sort_by, order) => {
         ON articles.article_id = comments.article_id
       ${topic ? `WHERE articles.topic = '${topic}'` : ""}
       GROUP BY articles.article_id
-      ORDER BY articles.${sort_by ? sort_by : "created_at"} ${
-      order ? order : "DESC"
-    };
+      ORDER BY articles.${sort_by ? sort_by : "created_at"} ${order};
     `
   );
   return responseRowsOr404(
@@ -69,4 +67,12 @@ exports.updateArticle = async ({ articleId, inc_votes }) => {
   const result = responseRowsOr404(query, "article not found");
   if (Array.isArray(result)) return result[0];
   return result;
+};
+
+exports.fetchTopics = async () => {
+  const { rows } = await db.query({
+    text: `SELECT DISTINCT topic FROM articles`,
+    rowMode: "array",
+  });
+  return rows.flat();
 };
