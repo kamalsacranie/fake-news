@@ -76,7 +76,6 @@ exports.patchArticle = async (req, res, next) => {
     const article = await updateArticle(updates);
     res.status(200).send({ article });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
