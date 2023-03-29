@@ -4,6 +4,7 @@ const {
   getArticles,
   getArticleComments,
   postArticleComment,
+  patchArticle,
 } = require("../controllers/articles");
 const { sqlError } = require("./errors");
 
@@ -11,6 +12,7 @@ const articlesRouter = express.Router();
 
 articlesRouter.get("/", getArticles);
 articlesRouter.get("/:articleId", getArticle);
+articlesRouter.patch("/:articleId", patchArticle);
 articlesRouter.get("/:articleId/comments", getArticleComments);
 articlesRouter.post("/:articleId/comments", postArticleComment);
 

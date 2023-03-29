@@ -47,3 +47,18 @@ exports.addComment = ({ commentBody, articleId, username }) => {
     )
     .then(({ rows: [newComment] }) => newComment);
 };
+
+exports.updateArticle = async ({ articleId, inc_votes }) => {
+  const query = await db.query(
+    `
+      UPDATE articles
+      SET votes = votes + $1
+      WHERE article_id = $2
+      RETURNING *;
+    `,
+    [inc_votes, articleId]
+  );
+  const result = responseRowsOr404(query, "article not found");
+  if (Array.isArray(result)) return result[0];
+  return result;
+};

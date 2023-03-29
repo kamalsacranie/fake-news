@@ -3,6 +3,7 @@ const {
   fetchArticles,
   fetchArticleComments,
   addComment,
+  updateArticle,
 } = require("../models/articles");
 const { fetchUser } = require("../models/users");
 
@@ -75,6 +76,22 @@ exports.postArticleComment = async (req, res, next) => {
     ]);
     res.status(201).send({ comment: newComment });
   } catch (err) {
+    next(err);
+  }
+};
+
+exports.patchArticle = async (req, res, next) => {
+  const { articleId } = req.params;
+  const updates = { articleId, inc_votes: req.body.inc_votes };
+  if (Object.values(updates).includes(undefined))
+    return next(new InvalidPostObject());
+  if (!parseInt(articleId))
+    return next(new InvalidQueryParam(400, "articleId"));
+  try {
+    const article = await updateArticle(updates);
+    res.status(200).send({ article });
+  } catch (err) {
+    console.log(err);
     next(err);
   }
 };

@@ -234,3 +234,77 @@ describe("POST /api/articles/:articleId/comments", () => {
     });
   });
 });
+
+describe("PATCH /api/articles/:articleId", () => {
+  describe("happy path", () => {
+    it("should return a 200", async () => {
+      await request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 10 })
+        .expect(200);
+    });
+    it("should return an object", async () => {
+      const {
+        body: { article },
+      } = await request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 10 })
+        .expect(200);
+      expect(article).toBeInstanceOf(Object);
+    });
+    it("the object should match the associated article object in the database but with the updated values", async () => {
+      const {
+        body: { article: updatedArticle },
+      } = await request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 10 })
+        .expect(200);
+      expect(updatedArticle).toEqual({
+        article_id: 1,
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        author: "butter_bridge",
+        body: "I find this existence challenging",
+        created_at: "2020-07-09T20:11:00.000Z",
+        title: "Living in the shadow of a great man",
+        topic: "mitch",
+        votes: 110,
+      });
+
+      const {
+        body: { article: updatedArticle2 },
+      } = await request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: -10 })
+        .expect(200);
+      expect(updatedArticle2).toEqual({
+        article_id: 1,
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        author: "butter_bridge",
+        body: "I find this existence challenging",
+        created_at: "2020-07-09T20:11:00.000Z",
+        title: "Living in the shadow of a great man",
+        topic: "mitch",
+        votes: 100,
+      });
+    });
+  });
+  describe("Sad path", () => {
+    it("should receive 400 if any of the required keys are missing", async () => {
+      await request(app).patch("/api/articles/1").send({}).expect(400);
+    });
+    it("should receive 404 if article id not found", async () => {
+      await request(app)
+        .patch("/api/articles/9999")
+        .send({ inc_votes: -10 })
+        .expect(404);
+    });
+    it("should receive 400 if bad article id provided", async () => {
+      await request(app)
+        .patch("/api/articles/fdjsioa")
+        .send({ inc_votes: -10 })
+        .expect(400);
+    });
+  });
+});
