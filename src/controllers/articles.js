@@ -4,23 +4,8 @@ const {
   fetchArticleComments,
   addComment,
 } = require("../models/articles");
+const { InvalidQueryParam, InvalidPostObject } = require("./errorStatus");
 const { fetchUser } = require("../models/users");
-
-class InvalidQueryParam {
-  constructor(status, queryParamName) {
-    this.status = status;
-    this.message = `the ${queryParamName} specified is not a valid`;
-  }
-}
-
-class InvalidPostObject {
-  constructor() {
-    this.status = 400;
-    this.message = `bad POST request`;
-  }
-}
-
-function articleRoute(callback) {}
 
 exports.getArticle = async (req, res, next) => {
   const { articleId } = req.params;
