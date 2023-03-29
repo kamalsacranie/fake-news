@@ -17,5 +17,5 @@ exports.fetchUser = async (username) => {
     `,
     [username]
   );
-  return responseRowsOrError(query, 400, "username did not match a valid user");
+  return responseRowsOrError(query, 400, "unknown user");
 };
