@@ -1,4 +1,4 @@
-const { responseRowsOr404 } = require("./utils");
+const { responseRowsOr404, responseRowsOrError } = require("./utils");
 const db = require("../db");
 
 exports.fetchArticle = async (articleId) => {
@@ -14,16 +14,19 @@ exports.fetchArticle = async (articleId) => {
   return responseRowsOr404(query, "article not found");
 };
 
-exports.fetchArticles = async () => {
+exports.fetchArticles = async (topic, sort_by, order) => {
   const query = await db.query(
     `
       SELECT articles.*, COUNT(comments.article_id) as comment_count FROM articles
-        JOIN comments
+        LEFT JOIN comments
         ON articles.article_id = comments.article_id
+      ${topic ? `WHERE articles.topic = '${topic}'` : ""}
       GROUP BY articles.article_id
-      ORDER BY articles.created_at DESC;
+      ORDER BY articles.${sort_by ? sort_by : "created_at"} ${order};
     `
   );
+  // feels like this should be in the controller but then retunr with the resopnserowsor404 would need to be moved to the controller ffs
+  if (topic) return query.rows;
   return responseRowsOr404(
     query,
     "the articles table currently contains no articles"
