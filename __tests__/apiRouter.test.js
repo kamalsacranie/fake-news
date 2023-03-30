@@ -15,13 +15,18 @@ describe("GET to /api", () => {
     it("Should return 200", async () => {
       await request(app).get("/api").expect(200);
     });
-    it("Should return the message 'welcome to my fake news server'", async () => {
-      await request(app)
-        .get("/api")
-        .expect(200)
-        .then(({ body: { message } }) => {
-          expect(message).toBe("welcome to my fake news server");
-        });
+    it("Should return the message endpoints.json file from directory root", async () => {
+      // this is impossible to test for if you go for the approach of reading
+      // the endpoints file in here because if it doesnt exist, botht the test
+      // and /api endpoint won't be able to read it in. I'm also not sure how
+      // I can sadpath test this without deleting the file temporarily
+      const { body } = await request(app).get("/api").expect(200);
+      expect(body).toBeInstanceOf(Object);
+      Object.keys(body).map((key) => {
+        const re = /\b(POST|DELETE|PATCH|GET)\b.*/i;
+        expect(re.test(key)).toBe(true);
+      });
+      expect(body).not.toHaveProperty("message");
     });
   });
   describe("Sad path", () => {
