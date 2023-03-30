@@ -4,7 +4,7 @@ const seed = require("./seed.js");
 const db = require("../");
 
 function runSeed() {
-  return seed(process.env.NODE_ENV ? testData : devData);
+  return seed(process.env.NODE_ENV === "test" ? testData : devData);
 }
 
 if (require.main === module) {
