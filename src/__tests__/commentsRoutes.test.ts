@@ -15,9 +15,6 @@ afterAll(() => {
 // deleted.
 describe("DELETE /api/comments/:commentId", () => {
   describe("Happy path", () => {
-    it("should return a 204", async () => {
-      await request(app).delete("/api/comments/8").expect(204);
-    });
     it("should not return any conetnt", async () => {
       const { body } = await request(app).delete("/api/comments/2").expect(204);
       expect(body).toEqual({});
