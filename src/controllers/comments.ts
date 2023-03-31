@@ -8,7 +8,8 @@ export const deleteComment: RequestHandler = async (req, res, next) => {
   if (!parseInt(commentId))
     return next(new InvalidQueryParam(400, "commentId"));
   try {
-    await Promise.all([removeComment(commentId), fetchComment(commentId)]);
+    await fetchComment(commentId);
+    await removeComment(commentId)
     res.status(204).send();
   } catch (err) {
     next(err);

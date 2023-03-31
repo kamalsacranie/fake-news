@@ -4,8 +4,8 @@ import request from "supertest";
 import app from "../app";
 import { Topic } from "../models/topics";
 
-beforeEach(() => {
-  return runSeed();
+beforeEach(async () => {
+  await runSeed();
 });
 afterAll(() => {
   db.end();

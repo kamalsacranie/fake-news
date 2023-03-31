@@ -13,7 +13,7 @@ export type Article = SeedArticle & {
   comment_count: string;
 };
 
-export const fetchArticle = async (articleId: string) => {
+export const fetchArticle = async (articleId: string | number) => {
   const query = await db.query(
     `
       SELECT articles.*, COUNT(comments.comment_id) as comment_count FROM articles

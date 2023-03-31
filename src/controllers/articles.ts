@@ -96,12 +96,13 @@ export const postArticleComment: RequestHandler = async (req, res, next) => {
   if (Object.values(comment).includes(undefined))
     return next(new InvalidPostObject());
   try {
-    const [newComment] = await Promise.all([
-      addComment(comment),
-      fetchUser(comment.username),
-    ]);
+    await fetchUser(comment.username);
+    await fetchArticle(articleId);
+    const newComment = await addComment(comment);
     res.status(201).send({ comment: newComment });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.code === "23503")
+      return next(new InvalidPostObject(400, "unknown user"));
     next(err);
   }
 };

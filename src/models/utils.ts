@@ -15,10 +15,11 @@ export const responseRowsOr404 = function <T = unknown>(
   { rows }: { rows: T[] },
   messageIfNoRows?: string
 ) {
-  if (!rows.length)
+  if (!rows.length) {
     return Promise.reject({
       status: 404,
       message: messageIfNoRows || "page not found",
     });
+  }
   return rows;
 };
