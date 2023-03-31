@@ -15,17 +15,17 @@ afterAll(() => {
 // deleted.
 describe("DELETE /api/comments/:commentId", () => {
   describe("Happy path", () => {
-    it("should return a 204", async () => {
-      await request(app).delete("/api/comments/8").expect(204);
+    it("should respond with a 204", async () => {
+      const { body } = await request(app).delete("/api/comments/1").expect(204);
     });
     it("should not return any conetnt", async () => {
-      const { body } = await request(app).delete("/api/comments/2").expect(204);
+      const { body } = await request(app).delete("/api/comments/1").expect(204);
       expect(body).toEqual({});
     });
     it("should remove the comment from the comments table", async () => {
-      await request(app).delete("/api/comments/3").expect(204);
+      await request(app).delete("/api/comments/1").expect(204);
       const { rows } = await db.query(
-        `SELECT * FROM comments WHERE comment_id = 3`
+        `SELECT * FROM comments WHERE comment_id = 1`
       );
       expect(rows).toHaveLength(0);
     });
