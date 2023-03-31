@@ -51,7 +51,7 @@ ignoring parts of the request.
 
 ### GET `/api/users/:username`
 
--
+- Status 404: Username does not exists
 
 ### GET `/api/articles/:article_id`
 
@@ -73,11 +73,11 @@ ignoring parts of the request.
 
 ### GET `/api/articles`
 
-- Bad queries:
+- Bad queries (silently handled):
   - `sort_by` a column that doesn't exist
   - `order` !== "asc" / "desc"
   - `topic` that is not in the database
-  - `topic` that exists but does not have any articles associated with it
+- `topic` that exists but does not have any articles associated with it
 
 ### PATCH `/api/comments/:comment_id`
 

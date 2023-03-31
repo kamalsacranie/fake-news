@@ -243,16 +243,14 @@ describe("GET /api/articles/:articleId/comments", () => {
     it("Should return 404 if the id specified does not exists in the database", async () => {
       const {
         body: { message },
-      } = await request(app).get("/api/articles/1000000/comments");
-      // .expect(404 || 400); // this is VERY TEMP. Fixing requires a whole rewrite
-      // expect(message).toBe("article not found");
+      } = await request(app).get("/api/articles/1000000/comments").expect(404);
+      expect(message).toBe("article not found");
     });
     it("Should return 400 if the ID is specified incorrectly", async () => {
       const {
         body: { message },
-      } = await request(app).get("/api/articles/string/comments");
-      // .expect(404 || 400);
-      // expect(message).toBe("the articleId specified is not a valid");
+      } = await request(app).get("/api/articles/string/comments").expect(400);
+      expect(message).toBe("the articleId specified is not a valid");
     });
     it("should return an empty list if there are no comments associated with an article", async () => {
       const {
@@ -272,7 +270,7 @@ describe("POST /api/articles/:articleId/comments", () => {
     });
     it("should respond with a 201", async () => {
       await request(app)
-        .post("/api/articles/1/comments")
+        .post("/api/articles/3/comments")
         .send(comment)
         .expect(201);
     });
@@ -280,7 +278,7 @@ describe("POST /api/articles/:articleId/comments", () => {
       const {
         body: { comment: newComment },
       } = await request(app)
-        .post("/api/articles/1/comments")
+        .post("/api/articles/3/comments")
         .send(comment)
         .expect(201);
       expect(newComment).toBeInstanceOf(Object);
@@ -289,7 +287,7 @@ describe("POST /api/articles/:articleId/comments", () => {
       const {
         body: { comment: newComment },
       } = await request(app)
-        .post("/api/articles/1/comments")
+        .post("/api/articles/3/comments")
         .send(comment)
         .expect(201);
       expect(newComment).toMatchObject({
@@ -297,7 +295,7 @@ describe("POST /api/articles/:articleId/comments", () => {
         author: comment.username,
         body: comment.body,
         votes: 0,
-        article_id: 1,
+        article_id: 3,
         created_at: expect.any(String),
       });
     });
@@ -308,7 +306,7 @@ describe("POST /api/articles/:articleId/comments", () => {
       const {
         body: { message },
       } = await request(app)
-        .post("/api/articles/1/comments")
+        .post("/api/articles/3/comments")
         .send(comment)
         .expect(400);
       expect(message).toBe("unknown user");
@@ -324,7 +322,7 @@ describe("POST /api/articles/:articleId/comments", () => {
         body: "jfdslkjk",
       };
       await request(app)
-        .post("/api/articles/1/comments")
+        .post("/api/articles/3/comments")
         .send(comment)
         .expect(400);
     });
@@ -335,7 +333,7 @@ describe("POST /api/articles/:articleId/comments", () => {
       const {
         body: { message },
       } = await request(app)
-        .post("/api/articles/1/comments")
+        .post("/api/articles/3/comments")
         .send(comment)
         .expect(400);
       expect(message).toBe("bad POST request");
