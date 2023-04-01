@@ -1,17 +1,12 @@
 import { RequestHandler } from "express";
-
 import { removeComment, fetchComment } from "../models/comments";
-import { InvalidQueryParam } from "./errorStatus";
+import { numericParametricHandler } from "./utils";
 
 export const deleteComment: RequestHandler = async (req, res, next) => {
   const { commentId } = req.params;
-  if (!parseInt(commentId))
-    return next(new InvalidQueryParam(400, "commentId"));
-  try {
+  numericParametricHandler(commentId, "commentId", next, async () => {
     await fetchComment(commentId);
-    await removeComment(commentId)
+    await removeComment(commentId);
     res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
+  });
 };

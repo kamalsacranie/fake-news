@@ -314,7 +314,10 @@ describe("POST /api/articles/:articleId/comments", () => {
     it("Should return 400 if the ID is specified incorrectly", async () => {
       const {
         body: { message },
-      } = await request(app).post("/api/articles/string/comments").expect(400);
+      } = await request(app)
+        .post("/api/articles/string/comments")
+        .send({ username: "jfsdk", body: "jfdlksj" })
+        .expect(400);
       expect(message).toBe("the articleId specified is not a valid");
     });
     it("should return a 400 if incorrectly structured object is passed in", async () => {

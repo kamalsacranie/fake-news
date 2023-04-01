@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { NextFunction, RequestHandler } from "express";
 import {
   fetchArticle,
   fetchArticles,
@@ -9,6 +9,7 @@ import {
 import { Topic, fetchTopics } from "../models/topics";
 import { InvalidQueryParam, InvalidPostObject } from "./errorStatus";
 import { fetchUser } from "../models/users";
+import { baseError, numericParametricHandler } from "./utils";
 
 export enum OrderValues {
   "DESC",
@@ -25,16 +26,17 @@ export enum ArticleColumns {
   "article_image_url",
 }
 
+const objectValidator = (object: Record<string, any>, next: NextFunction) => {
+  if (Object.values(object).includes(undefined))
+    return next(new InvalidPostObject());
+};
+
 export const getArticle: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
-  if (!parseInt(articleId))
-    return next(new InvalidQueryParam(400, "articleId"));
-  try {
+  await numericParametricHandler(articleId, "articleId", next, async () => {
     const [article] = await fetchArticle(articleId);
     res.status(200).send({ article });
-  } catch (err) {
-    next(err);
-  }
+  });
 };
 
 export const getArticles: RequestHandler = async (req, res, next) => {
@@ -58,66 +60,49 @@ export const getArticles: RequestHandler = async (req, res, next) => {
   if (!(order in OrderValues))
     return next({ status: 400, message: "invalid order argument" });
 
-  try {
+  baseError(next, async () => {
     const articles = await fetchArticles(
       topic,
-      sort_by as unknown as ArticleColumns,
-      order as unknown as OrderValues
-    ); // i should not need to do this
+      sort_by as unknown as ArticleColumns, // i should not need to do this
+      order as unknown as OrderValues // i should not need to do this
+    );
     res.status(200).send({ articles });
-  } catch (err) {
-    next(err);
-  }
+  });
 };
 
 export const getArticleComments: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
-  if (!parseInt(articleId))
-    return next(new InvalidQueryParam(400, "articleId"));
-  try {
+  await numericParametricHandler(articleId, "articleId", next, async () => {
     const [comments] = await Promise.all([
       fetchArticleComments(articleId),
       fetchArticle(articleId),
     ]);
     res.status(200).send({ comments });
-  } catch (err) {
-    next(err);
-  }
+  });
 };
 
 export const postArticleComment: RequestHandler = async (req, res, next) => {
-  const articleId = parseInt(req.params.articleId);
-  if (!articleId) return next(new InvalidQueryParam(400, "articleId"));
+  const { articleId } = req.params;
   const comment = {
     articleId,
     commentBody: req.body.body,
     username: req.body.username,
   };
-  if (Object.values(comment).includes(undefined))
-    return next(new InvalidPostObject());
-  try {
+  objectValidator(comment, next);
+  numericParametricHandler(articleId, "articleId", next, async () => {
     await fetchUser(comment.username);
     await fetchArticle(articleId);
     const newComment = await addComment(comment);
     res.status(201).send({ comment: newComment });
-  } catch (err: any) {
-    if (err.code === "23503")
-      return next(new InvalidPostObject(400, "unknown user"));
-    next(err);
-  }
+  });
 };
 
 export const patchArticle: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
   const updates = { articleId, inc_votes: req.body.inc_votes };
-  if (Object.values(updates).includes(undefined))
-    return next(new InvalidPostObject());
-  if (!parseInt(articleId))
-    return next(new InvalidQueryParam(400, "articleId"));
-  try {
+  objectValidator(updates, next);
+  numericParametricHandler(articleId, "articleId", next, async () => {
     const article = await updateArticle(updates);
     res.status(200).send({ article });
-  } catch (err) {
-    next(err);
-  }
+  });
 };
