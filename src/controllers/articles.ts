@@ -11,6 +11,7 @@ import { Topic, fetchTopics } from "../models/topics";
 import { InvalidQueryParam, InvalidPostObject } from "./errorStatus";
 import { fetchUser } from "../models/users";
 import { baseError, numericParametricHandler, objectValidator } from "./utils";
+import { responseRowsOrError } from "../models/utils";
 
 export enum OrderValues {
   "DESC",
@@ -86,7 +87,8 @@ export const postArticleComment: RequestHandler = async (req, res, next) => {
   };
   objectValidator(comment, next);
   numericParametricHandler(articleId, "articleId", next, async () => {
-    await fetchUser(comment.username);
+    const user = await fetchUser(comment.username);
+    if (!user) return Promise.reject({ status: 400, message: "unknown user" });
     await fetchArticle(articleId);
     const newComment = await addComment(comment);
     res.status(201).send({ comment: newComment });

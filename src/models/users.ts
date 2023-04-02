@@ -17,13 +17,15 @@ export const fetchUsers = async () => {
 };
 
 export const fetchUser = async (username: string) => {
-  const query = await db.query(
+  const {
+    rows: [user],
+  } = await db.query(
     `
       SELECT * FROM users WHERE username = $1
     `,
     [username]
   );
-  return responseRowsOrError<User>(query, 400, "unknown user");
+  return user as User;
 };
 
 export const addUser = async ({ username, name, avatar_url }: User) => {
