@@ -9,11 +9,12 @@ import {
   patchArticle,
 } from "../controllers/articles";
 import { sqlError } from "./errors";
+import { SeedArticle } from "../db/data/development-data/articles";
 
 const articlesRouter = express.Router();
 
 articlesRouter.get("/", getArticles);
-articlesRouter.get("/:articleId", getArticle);
+articlesRouter.get<{ articleId: string }>("/:articleId", getArticle);
 articlesRouter.patch("/:articleId", patchArticle);
 articlesRouter.get("/:articleId/comments", getArticleComments);
 articlesRouter.post("/:articleId/comments", postArticleComment);

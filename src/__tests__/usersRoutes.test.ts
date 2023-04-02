@@ -40,3 +40,66 @@ describe("GET /api/users", () => {
     });
   });
 });
+
+describe("POST /api/users", () => {
+  describe("happy path", () => {
+    it("should return a 201", async () => {
+      const user = {
+        username: "bigDickJohnny",
+        name: "Johnny Lloyd",
+        avatar_url:
+          "https://pbs.twimg.com/media/FNDUA-hWQAABjP-?format=jpg&name=large",
+      };
+      await request(app).post("/api/users").send(user).expect(201);
+    });
+    it("should return the new user added", async () => {
+      const user = {
+        username: "bigDickJohnny",
+        name: "Johnny Lloyd",
+        avatar_url:
+          "https://pbs.twimg.com/media/FNDUA-hWQAABjP-?format=jpg&name=large",
+      };
+      const {
+        body: { user: newUser },
+      } = await request(app).post("/api/users").send(user).expect(201);
+      expect(newUser).toEqual({
+        username: "bigDickJohnny",
+        name: "Johnny Lloyd",
+        avatar_url:
+          "https://pbs.twimg.com/media/FNDUA-hWQAABjP-?format=jpg&name=large",
+      });
+    });
+    it("should allow post request with only the mandatory field of the object", async () => {
+      const user = {
+        username: "bigDickJohnny",
+        name: "Johnny Lloyd",
+      };
+      const {
+        body: { user: newUser },
+      } = await request(app).post("/api/users").send(user).expect(201);
+      expect(newUser).toEqual({
+        username: "bigDickJohnny",
+        name: "Johnny Lloyd",
+        avatar_url: null,
+      });
+    });
+  });
+  describe("Sad path", () => {
+    it("should return 400 when given an object without all mandatory fields", async () => {
+      const user = {
+        username: "bigDickJohnny",
+      };
+      await request(app).post("/api/users").send(user).expect(400);
+    });
+    it("should return 400 and the message 'user already exists' when given a post request with a username already present", async () => {
+      const user = {
+        username: "bigDickJohnny",
+        name: "Johnny Lloyd",
+        avatar_url:
+          "https://pbs.twimg.com/media/FNDUA-hWQAABjP-?format=jpg&name=large",
+      };
+      await request(app).post("/api/users").send(user);
+      await request(app).post("/api/users").send(user).expect(400);
+    });
+  });
+});

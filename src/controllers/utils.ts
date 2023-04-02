@@ -1,12 +1,20 @@
 import { NextFunction } from "express";
 import { InvalidPostObject, InvalidQueryParam } from "./errorStatus";
 
-export const baseError = async (next: NextFunction, callback: Function) => {
+export const baseError = async (
+  next: NextFunction,
+  callback: Function,
+  failCriteria = (err: any) => false,
+  nextObj?: { [key: string]: any }
+) => {
   try {
     await callback();
   } catch (err: any) {
-    if (err.code === "23503")
-      return next(new InvalidPostObject(400, "unknown user"));
+    // allows us to pass fail criteria and nextObj through as args
+    const failed = failCriteria(err);
+    if (failed) {
+      return next(nextObj || err);
+    }
     next(err);
   }
 };
@@ -21,4 +29,12 @@ export const numericParametricHandler = async (
     return next(new InvalidQueryParam(400, queryParamName));
 
   baseError(next, callback);
+};
+
+export const objectValidator = (
+  object: Record<string, any>,
+  next: NextFunction
+) => {
+  if (Object.values(object).includes(undefined))
+    return next(new InvalidPostObject());
 };

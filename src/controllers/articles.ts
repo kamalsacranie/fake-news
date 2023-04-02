@@ -5,11 +5,12 @@ import {
   fetchArticleComments,
   addComment,
   updateArticle,
+  Article,
 } from "../models/articles";
 import { Topic, fetchTopics } from "../models/topics";
 import { InvalidQueryParam, InvalidPostObject } from "./errorStatus";
 import { fetchUser } from "../models/users";
-import { baseError, numericParametricHandler } from "./utils";
+import { baseError, numericParametricHandler, objectValidator } from "./utils";
 
 export enum OrderValues {
   "DESC",
@@ -25,11 +26,6 @@ export enum ArticleColumns {
   "votes",
   "article_image_url",
 }
-
-const objectValidator = (object: Record<string, any>, next: NextFunction) => {
-  if (Object.values(object).includes(undefined))
-    return next(new InvalidPostObject());
-};
 
 export const getArticle: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
