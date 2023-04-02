@@ -103,3 +103,33 @@ describe("POST /api/users", () => {
     });
   });
 });
+
+describe("GET /api/users/:username", () => {
+  describe("Happy path", () => {
+    it("should return 200", async () => {
+      await request(app).get("/api/users/lurker").expect(200);
+    });
+    it("should return a user object", async () => {
+      const {
+        body: { user },
+      } = await request(app).get("/api/users/lurker").expect(200);
+      expect(user).toEqual({
+        username: "lurker",
+        name: "do_nothing",
+        avatar_url:
+          "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+      });
+    });
+  });
+  describe("Sad path", () => {
+    it("invalid username should give 404", async () => {
+      await request(app).get("/api/users/lurker").expect(200);
+    });
+    it("should return the error message 'user not found'", async () => {
+      const {
+        body: { message },
+      } = await request(app).get("/api/users/jfdlsjkflsjlkfdjs").expect(404);
+      expect(message).toEqual("user not found");
+    });
+  });
+});
