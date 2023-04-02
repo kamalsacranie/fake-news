@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { User, addUser, fetchUsers } from "../models/users";
 import { baseError, objectValidator } from "./utils";
 import { InvalidPostObject } from "./errorStatus";
+import { fetchUser } from "../models/users";
 
 export const getUsers: RequestHandler = async (req, res, next) => {
   baseError(next, async () => {
@@ -28,4 +29,18 @@ export const postUser: RequestHandler = async (req, res, next) => {
     (err) => err.code === "23505" && err.constraint === "users_pkey",
     new InvalidPostObject(400, "unknown user")
   );
+};
+
+export const getUser: RequestHandler<{ username: string }> = (
+  req,
+  res,
+  next
+) => {
+  const { username } = req.params;
+  baseError(next, async () => {
+    const user = await fetchUser(username);
+    if (!user)
+      return Promise.reject({ status: 404, message: "user not found" });
+    res.status(200).send({ user });
+  });
 };
