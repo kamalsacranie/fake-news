@@ -1,6 +1,6 @@
 import { SeedComment } from "../db/data/development-data/comments";
 import db from "../db";
-import { responseRowsOr404 } from "./utils";
+import { responseRowsOr404, updateNumericColumn } from "./utils";
 
 export type Comment = {
   comment_id: number;
@@ -24,4 +24,21 @@ export const fetchComment = async (commentId: string) => {
     [commentId]
   );
   return responseRowsOr404<Comment>(query, "comment not found");
+};
+
+export const updateComment = async ({
+  commentId,
+  inc_votes,
+}: {
+  commentId: string;
+  inc_votes: number;
+}) => {
+  const updatedComment = await updateNumericColumn<Comment>(
+    "comments",
+    "votes",
+    inc_votes,
+    "comment_id",
+    commentId
+  );
+  return updatedComment;
 };

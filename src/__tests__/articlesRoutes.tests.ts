@@ -462,5 +462,11 @@ describe("PATCH /api/articles/:articleId", () => {
         .send({ inc_votes: -10 })
         .expect(400);
     });
+    it("should return 400 if invalid datatypes for inc_votes is passed", async () => {
+      await request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: "jkfdj" })
+        .expect(400);
+    });
   });
 });

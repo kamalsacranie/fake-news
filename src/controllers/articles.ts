@@ -8,9 +8,13 @@ import {
   Article,
 } from "../models/articles";
 import { Topic, fetchTopics } from "../models/topics";
-import { InvalidQueryParam, InvalidPostObject } from "./errorStatus";
+import { InvalidQueryParam, InvalidPostObject, Error404 } from "./errorStatus";
 import { fetchUser } from "../models/users";
-import { baseError, numericParametricHandler, objectValidator } from "./utils";
+import {
+  baseError,
+  numericParametricHandler,
+  checkNoObjectValuesAreUndefined,
+} from "./utils";
 import { responseRowsOrError } from "../models/utils";
 
 export enum OrderValues {
@@ -98,7 +102,7 @@ export const postArticleComment: RequestHandler = async (req, res, next) => {
     commentBody: req.body.body,
     username: req.body.username,
   };
-  objectValidator(comment, next);
+  checkNoObjectValuesAreUndefined(comment, next);
   numericParametricHandler(articleId, "articleId", next, async () => {
     const user = await fetchUser(comment.username);
     if (!user) return Promise.reject({ status: 400, message: "unknown user" });
@@ -110,10 +114,13 @@ export const postArticleComment: RequestHandler = async (req, res, next) => {
 
 export const patchArticle: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
-  const updates = { articleId, inc_votes: req.body.inc_votes };
-  objectValidator(updates, next);
+  const inc_votes = parseInt(req.body.inc_votes);
+  if (!inc_votes) return next(new InvalidQueryParam(400, "inc_votes"));
+  const updates = { articleId, inc_votes };
+  checkNoObjectValuesAreUndefined(updates, next);
   numericParametricHandler(articleId, "articleId", next, async () => {
-    const article = await updateArticle(updates);
-    res.status(200).send({ article });
+    const updatedArticle = await updateArticle(updates);
+    if (!updatedArticle) return next(new Error404(`article id ${articleId}`));
+    res.status(200).send({ article: updatedArticle });
   });
 };

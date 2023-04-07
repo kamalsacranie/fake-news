@@ -1,4 +1,8 @@
-import { responseRowsOr404, responseRowsOrError } from "./utils";
+import {
+  responseRowsOr404,
+  responseRowsOrError,
+  updateNumericColumn,
+} from "./utils";
 import db from "../db";
 import { SeedArticle } from "../db/data/development-data/articles";
 import { Topic } from "./topics";
@@ -77,10 +81,10 @@ export const addComment = ({
   return db
     .query(
       `
-          INSERT INTO comments (body, article_id, author)
-          VALUES ($1, $2, $3)
-          RETURNING *;
-        `,
+        INSERT INTO comments (body, article_id, author)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `,
       [commentBody, articleId, username]
     )
     .then(({ rows: [newComment] }) => newComment as Comment);
@@ -93,17 +97,12 @@ export const updateArticle = async ({
   articleId: string;
   inc_votes: number;
 }) => {
-  const query = await db.query(
-    `
-      UPDATE articles
-      SET votes = votes + $1
-      WHERE article_id = $2
-      RETURNING *;
-    `,
-    [inc_votes, articleId]
+  const updatedArticle = await updateNumericColumn<Article>(
+    "articles",
+    "votes",
+    inc_votes,
+    "article_id",
+    articleId
   );
-  const result = responseRowsOr404<Article>(query, "article not found");
-  // this needs to be done better
-  if (Array.isArray(result)) return result[0];
-  return result;
+  return updatedArticle;
 };
