@@ -37,11 +37,18 @@ export const getArticle: RequestHandler = async (req, res, next) => {
 };
 
 export const getArticles: RequestHandler = async (req, res, next) => {
-  let { topic, sort_by, order } = req.query as {
-    topic: Topic["slug"];
-    sort_by: string;
-    order: string;
-  }; // there must be a better way to do this
+  let { topic, sort_by, order, limit, p } = req.query as {
+    [key: string]: string;
+  };
+
+  const parsedLimit = limit ? parseInt(limit) : 10,
+    parsedPage = p ? parseInt(p) : 1;
+
+  if (!(parsedLimit > 0 && parsedPage > 0))
+    return next({
+      status: 400,
+      message: "both limit and p params must be positive, non-zero integers",
+    });
 
   if (topic) {
     const topicArray = await fetchTopics().then((topics) =>
@@ -51,17 +58,23 @@ export const getArticles: RequestHandler = async (req, res, next) => {
       return next({ status: 400, message: "this topic does not exist" });
   }
 
+  // think i can use the article type here and use keyof?
   if (!(sort_by in ArticleColumns || !sort_by))
-    return next({ status: 400, message: "invalid sort_by argument" });
+    return next({
+      status: 400,
+      message: `invalid sort_by argument: ${sort_by}`,
+    });
   order = order ? order.toUpperCase() : "DESC";
   if (!(order in OrderValues))
-    return next({ status: 400, message: "invalid order argument" });
+    return next({ status: 400, message: `invalid order argument: ${order}` });
 
   baseError(next, async () => {
     const articles = await fetchArticles(
       topic,
       sort_by as unknown as ArticleColumns, // i should not need to do this
-      order as unknown as OrderValues // i should not need to do this
+      order as unknown as OrderValues, // i should not need to do this
+      parsedLimit,
+      parsedPage
     );
     res.status(200).send({ articles });
   });

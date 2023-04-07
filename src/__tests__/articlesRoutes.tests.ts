@@ -117,7 +117,7 @@ describe("GET /api/articles", () => {
         const {
           body: { articles },
         } = await request(app).get("/api/articles?topic=mitch").expect(200);
-        expect(articles).toHaveLength(11);
+        expect(articles).toHaveLength(10);
         articles.forEach((article: Article) =>
           expect(article.topic).toBe("mitch")
         );
@@ -150,7 +150,13 @@ describe("GET /api/articles", () => {
           body: { articles: articles2 },
         } = await request(app).get("/api/articles?order=asc").expect(200);
         const unsortedArticles2 = [...articles2];
-        expect(unsortedArticles2).toEqual(articles.reverse());
+        expect(unsortedArticles2).toEqual(
+          articles2.sort(
+            (a: Article, b: Article) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime()
+          )
+        );
       });
       it("should do all the query params at once 🤪", async () => {
         const {
@@ -166,6 +172,32 @@ describe("GET /api/articles", () => {
         articles.forEach((article: Article) =>
           expect(article.topic).toBe("mitch")
         );
+      });
+      it("should return 10 items", async () => {
+        const {
+          body: { articles },
+        } = await request(app).get("/api/articles").expect(200);
+        expect(articles).toHaveLength(10);
+      });
+      it("should return items with the pk 11 onward when param p=2 is specified", async () => {
+        const {
+          body: { articles },
+        } = await request(app)
+          .get("/api/articles?sort_by=article_id&order=asc&p=2")
+          .expect(200);
+        expect(articles).toHaveLength(2);
+        expect(articles[0].article_id).toBe(11);
+        expect(articles[1].article_id).toBe(12);
+      });
+      it("should return 5 items when limit is given as 5", async () => {
+        const {
+          body: { articles },
+        } = await request(app)
+          .get("/api/articles?sort_by=article_id&order=asc&p=2")
+          .expect(200);
+        expect(articles).toHaveLength(2);
+        expect(articles[0].article_id).toBe(11);
+        expect(articles[1].article_id).toBe(12);
       });
     });
     describe("Sad path", () => {
@@ -196,6 +228,12 @@ describe("GET /api/articles", () => {
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
         expect(unsortedArticles).toEqual(articles);
+      });
+      it("should return 400 if an invalid number is passed through for either limit or p", async () => {
+        await request(app).get("/api/articles?limit=-1").expect(400);
+        await request(app).get("/api/articles?limit=yayay").expect(400);
+        await request(app).get("/api/articles?p=0").expect(400);
+        await request(app).get("/api/articles?p=oops").expect(400);
       });
     });
   });
