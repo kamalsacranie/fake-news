@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { User, addUser, fetchUsers } from "../models/users";
-import { baseError, objectValidator } from "./utils";
+import { baseError, checkNoObjectValuesAreUndefined } from "./utils";
 import { InvalidPostObject } from "./errorStatus";
 import { fetchUser } from "../models/users";
 
@@ -17,7 +17,7 @@ export const postUser: RequestHandler = async (req, res, next) => {
     username,
     name,
   };
-  objectValidator(userToAddMandatory, next);
+  checkNoObjectValuesAreUndefined(userToAddMandatory, next);
   const userToAdd: User = { ...userToAddMandatory, avatar_url };
 
   baseError(
