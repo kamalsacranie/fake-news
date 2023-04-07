@@ -95,6 +95,7 @@ describe("GET /api/articles", () => {
           votes: expect.any(Number),
           article_img_url: expect.any(String || undefined),
           comment_count: expect.any(String),
+          total_count: "12",
         });
         if (article.created_at) expect(article.created_at).toBeDateString();
       });
