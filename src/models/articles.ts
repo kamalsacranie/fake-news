@@ -29,17 +29,25 @@ export const fetchArticle = async (articleId: string | number) => {
 export const fetchArticles = async (
   topic: Topic["slug"],
   sort_by: ArticleColumns,
-  order: OrderValues
+  order: OrderValues,
+  limit: number,
+  page_number: number
 ) => {
   const query = await db.query(
     `
-      SELECT articles.*, COUNT(comments.article_id) as comment_count FROM articles
+      SELECT
+        articles.*,
+        COUNT(comments.article_id) as comment_count,
+        COUNT(*) OVER() AS total_count
+      FROM articles
         LEFT JOIN comments
         ON articles.article_id = comments.article_id
       ${topic ? `WHERE articles.topic = '${topic}'` : ""}
       GROUP BY articles.article_id
-      ORDER BY articles.${sort_by ? sort_by : "created_at"} ${order};
-    `
+      ORDER BY articles.${sort_by || "created_at"} ${order}
+      LIMIT $1 OFFSET $2;
+    `,
+    [limit, (page_number - 1) * limit]
   );
   // feels like this should be in the controller but then retunr with the resopnserowsor404 would need to be moved to the controller ffs
   if (topic) return query.rows;
