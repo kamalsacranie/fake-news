@@ -81,10 +81,10 @@ export const addComment = ({
   return db
     .query(
       `
-          INSERT INTO comments (body, article_id, author)
-          VALUES ($1, $2, $3)
-          RETURNING *;
-        `,
+        INSERT INTO comments (body, article_id, author)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `,
       [commentBody, articleId, username]
     )
     .then(({ rows: [newComment] }) => newComment as Comment);
