@@ -34,13 +34,6 @@ describe("convertTimestampToDate", () => {
     expect(result.key1).toBe(true);
     expect(result.key2).toBe(1);
   });
-  // Not a typescript necessary test function doesnt' even accept that
-  // test("returns unchanged object if no created_at property", () => {
-  //   const input = { key: "value" };
-  //   const result = convertTimestampToDate(input);
-  //   const expected = { key: "value" };
-  //   expect(result).toEqual(expected);
-  // });
 });
 
 describe("createRef", () => {

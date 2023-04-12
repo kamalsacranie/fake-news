@@ -8,14 +8,19 @@ import {
   Article,
 } from "../models/articles";
 import { Topic, fetchTopics } from "../models/topics";
-import { InvalidQueryParam, InvalidPostObject, Error404 } from "./errorStatus";
+import {
+  InvalidQueryParam,
+  InvalidPostObject,
+  Error404,
+  BaseError,
+} from "./errorStatus";
 import { fetchUser } from "../models/users";
 import {
   baseError,
   numericParametricHandler,
   checkNoObjectValuesAreUndefined,
 } from "./utils";
-import { responseRowsOrError } from "../models/utils";
+import { responseRowsOr404, responseRowsOrError } from "../models/utils";
 
 export enum OrderValues {
   "DESC",
@@ -35,7 +40,9 @@ export enum ArticleColumns {
 export const getArticle: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
   await numericParametricHandler(articleId, "articleId", next, async () => {
-    const [article] = await fetchArticle(articleId);
+    const article = await fetchArticle(articleId);
+    // responseRowsOr404(article, "article not found"); // problem catching the rejection
+    if (!article) return next(new Error404("article")); // neet to suss out what we must do about returning
     res.status(200).send({ article });
   });
 };
@@ -59,18 +66,14 @@ export const getArticles: RequestHandler = async (req, res, next) => {
       topics.map((topic) => topic.slug)
     );
     if (!topicArray.includes(topic))
-      return next({ status: 400, message: "this topic does not exist" });
+      return next(new BaseError(400, "this topic does not exist"));
   }
 
   // think i can use the article type here and use keyof?
   if (!(sort_by in ArticleColumns || !sort_by))
-    return next({
-      status: 400,
-      message: `invalid sort_by argument: ${sort_by}`,
-    });
+    return next(new InvalidQueryParam(400, "sort_by"));
   order = order ? order.toUpperCase() : "DESC";
-  if (!(order in OrderValues))
-    return next({ status: 400, message: `invalid order argument: ${order}` });
+  if (!(order in OrderValues)) return next(new InvalidQueryParam(400, "order"));
 
   baseError(next, async () => {
     const articles = await fetchArticles(
@@ -80,6 +83,7 @@ export const getArticles: RequestHandler = async (req, res, next) => {
       parsedLimit,
       parsedPage
     );
+    if (!articles) return next(new Error404(`${topic} articles`));
     res.status(200).send({ articles });
   });
 };
@@ -87,10 +91,12 @@ export const getArticles: RequestHandler = async (req, res, next) => {
 export const getArticleComments: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
   await numericParametricHandler(articleId, "articleId", next, async () => {
-    const [comments] = await Promise.all([
+    const [comments, article] = await Promise.all([
       fetchArticleComments(articleId),
       fetchArticle(articleId),
     ]);
+    if (!article) return next(new Error404("article"));
+    if (!comments) return next(new Error404("article comments"));
     res.status(200).send({ comments });
   });
 };
@@ -104,9 +110,9 @@ export const postArticleComment: RequestHandler = async (req, res, next) => {
   };
   checkNoObjectValuesAreUndefined(comment, next);
   numericParametricHandler(articleId, "articleId", next, async () => {
-    const user = await fetchUser(comment.username);
-    if (!user) return Promise.reject({ status: 400, message: "unknown user" });
-    await fetchArticle(articleId);
+    if (!(await fetchUser(comment.username)))
+      return next(new BaseError(400, "unknown user"));
+    if (!(await fetchArticle(articleId))) return next(new Error404("article"));
     const newComment = await addComment(comment);
     res.status(201).send({ comment: newComment });
   });
@@ -115,7 +121,7 @@ export const postArticleComment: RequestHandler = async (req, res, next) => {
 export const patchArticle: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
   const inc_votes = parseInt(req.body.inc_votes);
-  if (!inc_votes) return next(new InvalidQueryParam(400, "inc_votes"));
+  if (!inc_votes) return next(new InvalidQueryParam(400, "inc_votes")); // we now have two different wayt o handle errors, a functional way and a class way. we need to choose one
   const updates = { articleId, inc_votes };
   checkNoObjectValuesAreUndefined(updates, next);
   numericParametricHandler(articleId, "articleId", next, async () => {

@@ -123,7 +123,7 @@ describe("GET /api/users/:username", () => {
   });
   describe("Sad path", () => {
     it("invalid username should give 404", async () => {
-      await request(app).get("/api/users/lurker").expect(200);
+      await request(app).get("/api/users/lurkefjdksjfr").expect(404);
     });
     it("should return the error message 'user not found'", async () => {
       const {

@@ -1,12 +1,14 @@
 import { RequestHandler } from "express";
 import { User, addUser, fetchUsers } from "../models/users";
 import { baseError, checkNoObjectValuesAreUndefined } from "./utils";
-import { InvalidPostObject } from "./errorStatus";
+import { Error404, InvalidPostObject } from "./errorStatus";
 import { fetchUser } from "../models/users";
+import { responseRowsOr404 } from "../models/utils";
 
 export const getUsers: RequestHandler = async (req, res, next) => {
   baseError(next, async () => {
     const users = await fetchUsers();
+    if (!users.length) next(new Error("users"));
     res.status(200).send({ users });
   });
 };
@@ -39,8 +41,7 @@ export const getUser: RequestHandler<{ username: string }> = (
   const { username } = req.params;
   baseError(next, async () => {
     const user = await fetchUser(username);
-    if (!user)
-      return Promise.reject({ status: 404, message: "user not found" });
+    if (!user) return next(new Error404("user"));
     res.status(200).send({ user });
   });
 };

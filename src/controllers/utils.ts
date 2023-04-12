@@ -1,15 +1,16 @@
 import { NextFunction } from "express";
-import { BaseError, InvalidPostObject, InvalidQueryParam } from "./errorStatus";
+import { InvalidPostObject, InvalidQueryParam } from "./errorStatus";
 
 export const baseError = async (
   next: NextFunction,
   callback: Function,
-  failCriteria: (err: any) => boolean = () => false,
-  nextObj?: BaseError
+  failCriteria = (err: any) => false,
+  nextObj?: { [key: string]: any }
 ) => {
   try {
     await callback();
   } catch (err: any) {
+    // allows us to pass fail criteria and nextObj through as args
     const failed = failCriteria(err);
     if (failed) {
       return next(nextObj || err);
@@ -22,13 +23,12 @@ export const numericParametricHandler = async (
   numericParametric: string,
   queryParamName: string,
   next: NextFunction,
-  callback: Function,
-  failCriteria: (err: any) => boolean = () => false,
-  nextObj?: BaseError
+  callback: Function
 ) => {
   if (!parseInt(numericParametric))
     return next(new InvalidQueryParam(400, queryParamName));
-  baseError(next, callback, failCriteria, nextObj);
+
+  baseError(next, callback);
 };
 
 export const checkNoObjectValuesAreUndefined = (

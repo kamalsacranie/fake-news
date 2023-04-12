@@ -2,29 +2,29 @@ import format from "pg-format";
 import db from "../db";
 
 export const responseRowsOrError = function <T = unknown>(
-  { rows }: { rows: T[] },
+  response: T,
   status: number,
   messageIfNoRows: string
 ) {
-  if (!rows.length)
+  if (!response)
     return Promise.reject({
       status: status,
       message: messageIfNoRows,
     });
-  return rows;
+  return response;
 };
 
+// remove general typeing
 export const responseRowsOr404 = function <T = unknown>(
-  { rows }: { rows: T[] },
+  response: T,
   messageIfNoRows?: string
 ) {
-  if (!rows.length) {
+  if (!response) {
     return Promise.reject({
       status: 404,
       message: messageIfNoRows || "page not found",
     });
   }
-  return rows;
 };
 
 export const updateNumericColumn = async function <T>(
@@ -50,5 +50,5 @@ export const updateNumericColumn = async function <T>(
   const {
     rows: [updatedItem],
   } = await db.query(formattedQuery);
-  return updatedItem as T;
+  return updatedItem as T | undefined;
 };

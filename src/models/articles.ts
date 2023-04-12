@@ -1,14 +1,11 @@
-import {
-  responseRowsOr404,
-  responseRowsOrError,
-  updateNumericColumn,
-} from "./utils";
+import { updateNumericColumn } from "./utils";
 import db from "../db";
 import { SeedArticle } from "../db/data/development-data/articles";
 import { Topic } from "./topics";
 import { User } from "./users";
 import { ArticleColumns, OrderValues } from "../controllers/articles";
 import { Comment } from "./comments";
+import { QueryResult } from "pg";
 
 export type Article = SeedArticle & {
   article_id: number;
@@ -18,7 +15,9 @@ export type Article = SeedArticle & {
 };
 
 export const fetchArticle = async (articleId: string | number) => {
-  const query = await db.query(
+  const {
+    rows: [article],
+  } = await db.query(
     `
       SELECT articles.*, COUNT(comments.comment_id) as comment_count FROM articles
         LEFT JOIN comments ON articles.article_id = comments.article_id
@@ -27,7 +26,7 @@ export const fetchArticle = async (articleId: string | number) => {
     `,
     [articleId]
   );
-  return responseRowsOr404<Article>(query, "article not found");
+  return article;
 };
 
 export const fetchArticles = async (
@@ -37,7 +36,7 @@ export const fetchArticles = async (
   limit: number,
   page_number: number
 ) => {
-  const query = await db.query(
+  const { rows }: { rows: Article[] } = await db.query(
     `
       SELECT
         articles.*,
@@ -53,12 +52,7 @@ export const fetchArticles = async (
     `,
     [limit, (page_number - 1) * limit]
   );
-  // feels like this should be in the controller but then retunr with the resopnserowsor404 would need to be moved to the controller ffs
-  if (topic) return query.rows;
-  return responseRowsOr404<Article>(
-    query,
-    "the articles table currently contains no articles"
-  );
+  return rows;
 };
 
 export const fetchArticleComments = async (articleId: string) => {
@@ -71,23 +65,24 @@ export const fetchArticleComments = async (articleId: string) => {
   return rows;
 };
 
-export const addComment = ({
+export const addComment = async ({
   commentBody,
   articleId,
   username,
 }: {
   [key: string]: any;
 }) => {
-  return db
-    .query(
-      `
-        INSERT INTO comments (body, article_id, author)
-        VALUES ($1, $2, $3)
-        RETURNING *;
-      `,
-      [commentBody, articleId, username]
-    )
-    .then(({ rows: [newComment] }) => newComment as Comment);
+  const {
+    rows: [comment],
+  } = await db.query<Comment>( // this is the way to type our queries
+    `
+      INSERT INTO comments (body, article_id, author)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `,
+    [commentBody, articleId, username]
+  );
+  return comment;
 };
 
 export const updateArticle = async ({

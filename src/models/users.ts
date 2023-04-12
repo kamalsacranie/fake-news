@@ -1,5 +1,4 @@
 import db from "../db";
-import { responseRowsOr404, responseRowsOrError } from "./utils";
 
 export type User = {
   username: string;
@@ -8,15 +7,15 @@ export type User = {
 };
 
 export const fetchUsers = async () => {
-  const query = await db.query(
+  const { rows }: { rows: User[] } = await db.query(
     `
       SELECT * FROM users;
     `
   );
-  return responseRowsOr404<User>(query, "currently no users in the database");
+  return rows;
 };
 
-export const fetchUser = async (username: string) => {
+export const fetchUser = async (username: User["username"]) => {
   const {
     rows: [user],
   } = await db.query(
@@ -25,7 +24,7 @@ export const fetchUser = async (username: string) => {
     `,
     [username]
   );
-  return user as User;
+  return user as User | undefined;
 };
 
 export const addUser = async ({ username, name, avatar_url }: User) => {

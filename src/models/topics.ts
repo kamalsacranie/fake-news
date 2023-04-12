@@ -1,5 +1,4 @@
 import db from "../db";
-import { responseRowsOr404 } from "./utils";
 
 export type Topic = {
   topic_id: number;
@@ -8,6 +7,6 @@ export type Topic = {
 };
 
 export const fetchTopics = async () => {
-  const query = await db.query(`SELECT * FROM topics;`);
-  return responseRowsOr404<Topic>(query, "currently no topics in the database");
+  const { rows } = await db.query(`SELECT * FROM topics;`);
+  return rows as Topic[];
 };
