@@ -21,7 +21,7 @@
     "test": "jest --detectOpenHandles --runInBand --verbose --passWithNoTests --no-cache",
     "prepare": "husky install",
     "start": "npm run build; npm run seed; node ./dist/listen.js",
-    "build": "npx tsc",
+    "build": "tsc",
     "seed-prod": "NODE_ENV=production npm run seed"
   },
   "repository": {
