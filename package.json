@@ -2,7 +2,7 @@
   "name": "be-nc-news",
   "version": "1.0.0",
   "description": "bc-nc-news",
-  "main": "./src/listen.js",
+  "main": "./dist/listen.js",
   "jest": {
     "setupFilesAfterEnv": [
       "jest-extended/all"
