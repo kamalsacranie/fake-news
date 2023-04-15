@@ -42,7 +42,8 @@ will need to create **three different `.env`** files called:
 
 - `.env`: contains base environment variables used in both the test and develop
   cases
-- `.env.develop`: contains only environment variables used in ***development***
+- `.env.development`: contains only environment variables used in
+  ***development***
 - `.env.test`: contains only environment variables used in ***testing***
 
 To you the docker container, you must define the following in `.env`:
