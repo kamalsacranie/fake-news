@@ -24,7 +24,7 @@ jobs:
           git push origin --delete production || true
           git branch --delete production || true
           git checkout --orphan production
-          git rm -r .
+          git rm -rf .
           git checkout main -- package.json endpoints.json package-lock.json
           git add ./dist/
           git config --global user.name "GitHub Actions"
