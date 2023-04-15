@@ -1,6 +1,8 @@
 import { Pool } from "pg";
 import * as dotenv from "dotenv";
 
+const temp = process.env.NODE_ENV || "development";
+console.log(temp);
 const ENV = process.env.NODE_ENV || "development";
 
 const baseEnvPath = `${__dirname}/../../.env`;
