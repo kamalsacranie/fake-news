@@ -69,3 +69,16 @@ the `postgres` database.
 
 To stop the `docker` container, you simply need to run `docker-compose down` in
 the root directory of the project.
+
+# Use of GitHub actions
+
+We use a GitHub action to build our project using the `tsc` command because in
+our production server (hosted on [render](https://render.com)) `npm` only
+installs non-dev dependencies^[This is the expected behaviour.]. Hence, we use
+an action to perform a complete install and run `npm build` which generates our
+`dist/` directory which we push to the repo. Now our Render server can use to
+run the command `node ./dist/listen.js` after installing the production
+dependencies.
+
+> A nice thing that we could implement is pushing only `dist/` and`package.json`
+> to a deployment branch which render tracks.
