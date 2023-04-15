@@ -21,8 +21,8 @@ jobs:
         run: npm run build
       - name: Commit and push changes to production branch
         run: |
-          git push origin --delete production &> /dev/null
-          git branch --delete production &> /dev/null
+          git push origin --delete production || true
+          git branch --delete production || true
           git checkout --orphan production
           git rm -rf .
           git config --global user.name "GitHub Actions"
