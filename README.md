@@ -47,10 +47,11 @@ will need to create **three different `.env`** files called:
 
 To you the docker container, you must define the following in `.env`:
 
+- `PORT=<express_port>`
 - `PGUSER=postgres`
 - `PGPASSWORD=<any_password>`
-- `PGPORT=<any_port>`
-- `PGHOST=localhost`
+- `PGPORT=<postgres_server_port>`
+- `PGHOST=127.0.0.1`
 
 Then, in `env.develop` and `.env.test` you must define `PGDATABASE` as `nc_news`
 and `nc_news_test`.^[This naming convention corresponds to how our database is
