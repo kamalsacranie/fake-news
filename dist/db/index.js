@@ -25,6 +25,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const pg_1 = require("pg");
 const dotenv = __importStar(require("dotenv"));
+const temp = process.env.NODE_ENV || "development";
+console.log(temp);
 const ENV = process.env.NODE_ENV || "development";
 const baseEnvPath = `${__dirname}/../../.env`;
 dotenv.config({ path: baseEnvPath });
