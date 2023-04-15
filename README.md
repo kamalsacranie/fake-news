@@ -33,7 +33,7 @@ npm test
 
 anywhere in the project directory. This will automatically seed the database. If
 you want to run the server locally, you simply need to run `npm run start` which
-will run the server on at the url `localhost:9090`.
+will run the server on at the URL `localhost:9090`.
 
 ## Environment setup
 
