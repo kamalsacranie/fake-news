@@ -15,17 +15,16 @@ export const getUsers: RequestHandler = async (req, res, next) => {
 
 export const postUser: RequestHandler = async (req, res, next) => {
   const { username, name, avatar_url } = req.body;
-  const userToAddMandatory = {
+  const userToAdd: Partial<User> = {
     username,
     name,
   };
-  checkNoObjectValuesAreUndefined(userToAddMandatory, next);
-  const userToAdd: User = { ...userToAddMandatory, avatar_url };
-
   baseError(
     next,
     async () => {
-      const newUser = await addUser(userToAdd);
+      checkNoObjectValuesAreUndefined(userToAdd, next);
+      userToAdd["avatar_url"] = avatar_url;
+      const newUser = await addUser(userToAdd as User);
       res.status(201).send({ user: newUser });
     },
     (err) => err.code === "23505" && err.constraint === "users_pkey",

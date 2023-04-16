@@ -10,7 +10,6 @@ describe("responseRowsOr404())", () => {
     try {
       await responseRowsOr404(input.rows.length);
     } catch (err: any) {
-      console.log(err);
       expect(err.message).toBe("page not found");
       expect(err.status).toBe(404);
     }

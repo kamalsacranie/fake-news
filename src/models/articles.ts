@@ -29,6 +29,30 @@ export const fetchArticle = async (articleId: string | number) => {
   return article;
 };
 
+export const addArticle = async ({
+  author,
+  title,
+  body,
+  topic,
+  article_image_url,
+}: Record<string, string> & { article_image_url?: string }) => {
+  const {
+    rows: [article],
+  } = await db.query(
+    `
+      INSERT INTO articles (author, title, body, topic${
+        article_image_url ? ", article_image_url" : ""
+      })
+      VALUES ($1, $2, $3, $4${article_image_url ? ", $5" : ""})
+      RETURNING *;
+    `,
+    [author, title, body, topic].concat(
+      article_image_url ? [article_image_url] : []
+    )
+  );
+  return article;
+};
+
 export const fetchArticles = async (
   topic: Topic["slug"],
   sort_by: ArticleColumns,

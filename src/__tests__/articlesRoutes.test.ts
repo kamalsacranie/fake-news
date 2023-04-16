@@ -4,6 +4,7 @@ import request from "supertest";
 import app from "../app";
 import { Article } from "../models/articles";
 import { Comment } from "../models/comments";
+import { RequestArticle } from "../controllers/articles";
 
 beforeEach(async () => {
   await runSeed();
@@ -430,6 +431,101 @@ describe("PATCH /api/articles/:articleId", () => {
         .patch("/api/articles/fdjsioa")
         .send({ inc_votes: -10 })
         .expect(400);
+    });
+  });
+});
+
+describe("POST /api/articles", () => {
+  describe("Happy path", () => {
+    let testArticle: RequestArticle;
+    beforeEach(() => {
+      testArticle = {
+        author: "lurker",
+        title: "Kamal's article",
+        body: "Yes this is an article",
+        topic: "paper",
+        article_img_url: "https://google.com",
+      };
+    });
+    it("should return a 201", async () => {
+      await request(app).post("/api/articles").send(testArticle).expect(201);
+    });
+    it("should return an object", async () => {
+      const {
+        body: { article },
+      } = await request(app)
+        .post("/api/articles")
+        .send(testArticle)
+        .expect(201);
+      expect(article).toBeInstanceOf(Object);
+    });
+    it("should return an object matching the following object", async () => {
+      const {
+        body: { article },
+      } = await request(app).post("/api/articles").send(testArticle);
+      expect(article).toMatchObject({
+        article_id: 13,
+        title: "Kamal's article",
+        topic: "paper",
+        author: "lurker",
+        body: "Yes this is an article",
+        created_at: expect.any(String),
+        votes: 0,
+        article_img_url:
+          "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+        comment_count: "0",
+      });
+    });
+  });
+  describe("Sad path", () => {
+    it("should not throw an error when an object without any optional keys is used", async () => {
+      const testArticle = {
+        author: "lurker",
+        title: "Kamal's article",
+        body: "Yes this is an article",
+        topic: "paper",
+      };
+      await request(app).post("/api/articles").send(testArticle).expect(201);
+    });
+    it("should give a 400 if any of the required keys are missing", async () => {
+      const testArticle = {};
+      await request(app).post("/api/articles").send(testArticle).expect(400);
+    });
+    it("should return a message alerting the user to a bad post request", async () => {
+      const testArticle = {};
+      const {
+        body: { message },
+      } = await request(app)
+        .post("/api/articles")
+        .send(testArticle)
+        .expect(400);
+      expect(message).toBe("bad POST request");
+    });
+    it("should return 400 if the image url is not a url", async () => {
+      const testArticle = {
+        author: "lurker",
+        title: "jfdks",
+        body: "Yes this is an article",
+        topic: "paper",
+        article_img_url: "jfdlksj",
+      };
+      await request(app).post("/api/articles").send(testArticle).expect(400);
+    });
+    it("should return a message specifying that the url was bad and what the url was", async () => {
+      const testArticle = {
+        author: "lurker",
+        title: "jfdks",
+        body: "Yes this is an article",
+        topic: "paper",
+        article_img_url: "badurl",
+      };
+      const {
+        body: { message },
+      } = await request(app)
+        .post("/api/articles")
+        .send(testArticle)
+        .expect(400);
+      expect(message).toBe("invalid URL given: badurl");
     });
   });
 });

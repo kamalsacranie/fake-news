@@ -1,5 +1,9 @@
 import { NextFunction } from "express";
-import { InvalidPostObject, InvalidQueryParam } from "./errorStatus";
+import {
+  InvalidPostObject,
+  InvalidQueryParam,
+  InvalidURL,
+} from "./errorStatus";
 
 export const baseError = async (
   next: NextFunction,
@@ -35,6 +39,15 @@ export const checkNoObjectValuesAreUndefined = (
   object: Record<string, any>,
   next: NextFunction
 ) => {
-  if (Object.values(object).includes(undefined))
-    return next(new InvalidPostObject());
+  if (Object.values(object).includes(undefined)) throw new InvalidPostObject();
+};
+
+export const validateURL = (url: string | undefined) => {
+  if (!url) return;
+  try {
+    new URL(url);
+    return url;
+  } catch (err: any) {
+    if (err.code === "ERR_INVALID_URL") throw new InvalidURL(url);
+  }
 };
