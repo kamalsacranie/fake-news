@@ -79,12 +79,19 @@ export const fetchArticles = async (
   return rows;
 };
 
-export const fetchArticleComments = async (articleId: string) => {
+export const fetchArticleComments = async (
+  articleId: string,
+  limit: number,
+  page: number
+) => {
   const { rows }: { rows: Comment[] } = await db.query(
     `
-      SELECT * FROM comments WHERE comments.article_id = $1 ORDER BY comments.created_at DESC
+      SELECT * FROM comments
+      WHERE comments.article_id = $1
+      ORDER BY comments.created_at DESC
+      LIMIT $2 OFFSET $3;
     `,
-    [articleId]
+    [articleId, limit, (page - 1) * limit]
   );
   return rows;
 };
