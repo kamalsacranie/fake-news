@@ -117,10 +117,20 @@ export const getArticles: RequestHandler = async (req, res, next) => {
 
 export const getArticleComments: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
+  const { limit, p } = req.query as Record<string, string>;
+  const parsedLimit = limit ? parseInt(limit) : 10,
+    parsedPage = p ? parseInt(p) : 1;
+
+  if (!(parsedLimit > 0 && parsedPage > 0))
+    return next({
+      status: 400,
+      message: "both limit and p params must be positive, non-zero integers",
+    });
+
   await numericParametricHandler(articleId, "articleId", next, async () => {
     const [comments, article] = await Promise.all([
       // even in this promise rejects, we would only get that rejection if we used .catch and not try catch
-      fetchArticleComments(articleId),
+      fetchArticleComments(articleId, parsedLimit, parsedPage),
       fetchArticle(articleId),
     ]);
     if (!article) return next(new Error404("article"));

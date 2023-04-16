@@ -217,7 +217,7 @@ describe("GET /api/articles/:articleId/comments", () => {
         body: { comments },
       } = await request(app).get("/api/articles/1/comments").expect(200);
       expect(comments).toBeInstanceOf(Array);
-      expect(comments).toHaveLength(11);
+      expect(comments).toHaveLength(10);
     });
     it("comments should match the comment object schema", async () => {
       const {
@@ -247,6 +247,26 @@ describe("GET /api/articles/:articleId/comments", () => {
       );
       expect(unsortedComments).toEqual(comments);
     });
+    it("should return the first 5 items when given a limit of 5", async () => {
+      const {
+        body: { comments },
+      }: { body: { comments: Comment[] } } = await request(app)
+        .get("/api/articles/1/comments?limit=5")
+        .expect(200);
+
+      expect(comments).toHaveLength(5);
+      comments.every(({ comment_id }, idx) => expect((comment_id = idx + 1)));
+    });
+    it("should return the second round of 5 items when given a limit of 5 and a page of 2", async () => {
+      const {
+        body: { comments },
+      }: { body: { comments: Comment[] } } = await request(app)
+        .get("/api/articles/1/comments?limit=5?page=2")
+        .expect(200);
+
+      expect(comments).toHaveLength(5);
+      comments.every(({ comment_id }, idx) => expect((comment_id = idx + 6)));
+    });
   });
   describe("Sad path", () => {
     it("Should return 404 if the id specified does not exists in the database", async () => {
@@ -267,6 +287,24 @@ describe("GET /api/articles/:articleId/comments", () => {
       } = await request(app).get("/api/articles/2/comments").expect(200);
       expect(comments).toBeInstanceOf(Array);
       expect(comments).toHaveLength(0);
+    });
+    it("should return 400 if any of the query parameters are incorrect", async () => {
+      const {
+        body: { message: message1 },
+      } = await request(app)
+        .get("/api/articles/2/comments?limit=ioeiowiroe")
+        .expect(400);
+      expect(message1).toBe(
+        "both limit and p params must be positive, non-zero integers"
+      );
+      const {
+        body: { message: message2 },
+      } = await request(app)
+        .get("/api/articles/2/comments?p=ioeiowiroe")
+        .expect(400);
+      expect(message2).toBe(
+        "both limit and p params must be positive, non-zero integers"
+      );
     });
   });
 });
