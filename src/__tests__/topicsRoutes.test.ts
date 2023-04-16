@@ -45,3 +45,72 @@ describe("GET to /api/topics", () => {
     });
   });
 });
+
+describe("POST /api/toipcs", () => {
+  describe("Happy path", () => {
+    let testTopic: {
+      slug: string;
+      description: string;
+    };
+    beforeEach(() => {
+      testTopic = {
+        slug: "bouldering",
+        description:
+          "The best sport in the world, even if I'm currently injured",
+      };
+    });
+    it("should return 201 upon sucess", async () => {
+      await request(app).post("/api/topics").send(testTopic).expect(201);
+    });
+    it("should return an object", async () => {
+      const {
+        body: { topic },
+      } = await request(app).post("/api/topics").send(testTopic).expect(201);
+      expect(topic).toBeInstanceOf(Object);
+    });
+    it("should return the new created topic", async () => {
+      const {
+        body: { topic },
+      } = await request(app).post("/api/topics").send(testTopic).expect(201);
+      expect(topic).toMatchObject({
+        slug: "bouldering",
+        description:
+          "The best sport in the world, even if I'm currently injured",
+      });
+    });
+    it("should slugify the given slug string even if not a slug", async () => {
+      const testTopic = {
+        slug: "Outdoor Bouldering (1990)",
+        description:
+          "The best sport in the world, even if I'm currently injured",
+      };
+      const {
+        body: { topic },
+      } = await request(app).post("/api/topics").send(testTopic);
+      expect(topic.slug).toBe("outdoor-bouldering-1990");
+    });
+  });
+  describe("Sad path", () => {
+    it("should return 400 if any of required key values are undefined and the correct message", async () => {
+      const testTopic = {
+        slug: "bouldering",
+      };
+      const {
+        body: { message },
+      } = await request(app).post("/api/topics").send(testTopic).expect(400);
+      expect(message).toBe("bad POST request");
+    });
+    it("should return 409 if topic already exists", async () => {
+      const testTopic = {
+        slug: "bouldering",
+        description:
+          "The best sport in the world, even if I'm currently injured",
+      };
+      await request(app).post("/api/topics").send(testTopic).expect(201);
+      const {
+        body: { message },
+      } = await request(app).post("/api/topics").send(testTopic).expect(409);
+      expect(message).toBe(`topic "bouldering" already exists`);
+    });
+  });
+});
