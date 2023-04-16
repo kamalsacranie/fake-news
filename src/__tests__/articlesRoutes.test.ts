@@ -529,3 +529,32 @@ describe("POST /api/articles", () => {
     });
   });
 });
+
+describe("DELETE /api/articles/:article_id", () => {
+  describe("Happy path", () => {
+    it("should return a 204", async () => {
+      await request(app).delete("/api/articles/1").expect(204);
+    });
+    it("should delete the article with the pk 1 from the database", async () => {
+      await request(app).delete("/api/articles/1").expect(204);
+      const { rows } = await db.query(
+        `SELECT * FROM articles WHERE articles.article_id = 1;`
+      );
+      expect(rows).toHaveLength(0);
+    });
+  });
+  describe("Sad path", () => {
+    it("should return a 404 if an article id is not found and return a message", async () => {
+      const {
+        body: { message },
+      } = await request(app).delete("/api/articles/10000000").expect(404);
+      expect(message).toBe("article id 10000000 not found");
+    });
+    it("should return a 400 if a bad article ID is given", async () => {
+      const {
+        body: { message },
+      } = await request(app).delete("/api/articles/jifjis").expect(400);
+      expect(message).toBe("the articleId specified is not a valid");
+    });
+  });
+});
