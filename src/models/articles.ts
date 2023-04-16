@@ -9,7 +9,7 @@ import { QueryResult } from "pg";
 
 export type Article = SeedArticle & {
   article_id: number;
-  topic: Topic["topic_id"];
+  topic: Topic["slug"];
   author: User["username"];
   comment_count: string;
 };

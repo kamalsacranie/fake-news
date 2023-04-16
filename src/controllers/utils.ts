@@ -37,7 +37,7 @@ export const numericParametricHandler = async (
 
 export const checkNoObjectValuesAreUndefined = (
   object: Record<string, any>,
-  next: NextFunction
+  next: NextFunction // not needed
 ) => {
   if (Object.values(object).includes(undefined)) throw new InvalidPostObject();
 };
