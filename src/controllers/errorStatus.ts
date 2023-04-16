@@ -25,3 +25,9 @@ export class InvalidPostObject extends BaseError {
     super(status, message);
   }
 }
+
+export class InvalidURL extends BaseError {
+  constructor(public url: string, public status: number = 400) {
+    super(status, `invalid URL given: ${url}`);
+  }
+}

@@ -24,9 +24,9 @@ export const patchComment: RequestHandler = async (req, res, next) => {
   if (!inc_votes) return next(new InvalidQueryParam(400)); // mybe make a function along the lines of: ensureNumericRequestValue
 
   const updates = { commentId, inc_votes };
-  checkNoObjectValuesAreUndefined(updates, next);
 
   numericParametricHandler(commentId, "commentId", next, async () => {
+    checkNoObjectValuesAreUndefined(updates, next);
     const updatedComment = await updateComment(updates);
 
     if (!updatedComment) return next(new Error404(`comment ${commentId}`));

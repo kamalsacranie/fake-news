@@ -6,6 +6,7 @@ import {
   addComment,
   updateArticle,
   Article,
+  addArticle,
 } from "../models/articles";
 import { Topic, fetchTopics } from "../models/topics";
 import {
@@ -19,6 +20,7 @@ import {
   baseError,
   numericParametricHandler,
   checkNoObjectValuesAreUndefined,
+  validateURL,
 } from "./utils";
 import { responseRowsOr404, responseRowsOrError } from "../models/utils";
 
@@ -41,9 +43,33 @@ export const getArticle: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
   await numericParametricHandler(articleId, "articleId", next, async () => {
     const article = await fetchArticle(articleId);
-    // responseRowsOr404(article, "article not found"); // problem catching the rejection
+    // responseRowsOr404(article, "article not found"); // problem catching the rejection. this is because with try catch you actually need to throw
     if (!article) return next(new Error404("article")); // neet to suss out what we must do about returning
     res.status(200).send({ article });
+  });
+};
+
+export type RequestArticle = {
+  author: string;
+  title: string;
+  body: string;
+  topic: string;
+  article_img_url?: string;
+};
+export const postArticle: RequestHandler = async (req, res, next) => {
+  const requestBody: RequestArticle = req.body;
+  const article: RequestArticle = {
+    author: requestBody.author,
+    title: requestBody.title,
+    body: requestBody.body,
+    topic: requestBody.topic,
+  };
+  baseError(next, async () => {
+    checkNoObjectValuesAreUndefined(article, next);
+    article["article_img_url"] = validateURL(requestBody.article_img_url);
+    const newArticle: Article = await addArticle(article);
+    newArticle["comment_count"] = "0";
+    res.status(201).send({ article: newArticle });
   });
 };
 
@@ -92,6 +118,7 @@ export const getArticleComments: RequestHandler = async (req, res, next) => {
   const { articleId } = req.params;
   await numericParametricHandler(articleId, "articleId", next, async () => {
     const [comments, article] = await Promise.all([
+      // even in this promise rejects, we would only get that rejection if we used .catch and not try catch
       fetchArticleComments(articleId),
       fetchArticle(articleId),
     ]);
@@ -108,8 +135,8 @@ export const postArticleComment: RequestHandler = async (req, res, next) => {
     commentBody: req.body.body,
     username: req.body.username,
   };
-  checkNoObjectValuesAreUndefined(comment, next);
   numericParametricHandler(articleId, "articleId", next, async () => {
+    checkNoObjectValuesAreUndefined(comment, next);
     if (!(await fetchUser(comment.username)))
       return next(new BaseError(400, "unknown user"));
     if (!(await fetchArticle(articleId))) return next(new Error404("article"));
@@ -123,8 +150,8 @@ export const patchArticle: RequestHandler = async (req, res, next) => {
   const inc_votes = parseInt(req.body.inc_votes);
   if (!inc_votes) return next(new InvalidQueryParam(400, "inc_votes")); // we now have two different wayt o handle errors, a functional way and a class way. we need to choose one
   const updates = { articleId, inc_votes };
-  checkNoObjectValuesAreUndefined(updates, next);
   numericParametricHandler(articleId, "articleId", next, async () => {
+    checkNoObjectValuesAreUndefined(updates, next);
     const updatedArticle = await updateArticle(updates);
     if (!updatedArticle) return next(new Error404(`article id ${articleId}`));
     res.status(200).send({ article: updatedArticle });

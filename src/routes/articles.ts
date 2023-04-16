@@ -7,6 +7,7 @@ import {
   getArticleComments,
   postArticleComment,
   patchArticle,
+  postArticle,
 } from "../controllers/articles";
 import { sqlError } from "./errors";
 import { SeedArticle } from "../db/data/development-data/articles";
@@ -14,6 +15,7 @@ import { SeedArticle } from "../db/data/development-data/articles";
 const articlesRouter = express.Router();
 
 articlesRouter.get("/", getArticles);
+articlesRouter.post("/", postArticle);
 articlesRouter.get<{ articleId: string }>("/:articleId", getArticle);
 articlesRouter.patch("/:articleId", patchArticle);
 articlesRouter.get("/:articleId/comments", getArticleComments);
