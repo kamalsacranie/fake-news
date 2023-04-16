@@ -7,6 +7,7 @@ import {
   updateArticle,
   Article,
   addArticle,
+  removeArticle,
 } from "../models/articles";
 import { Topic, fetchTopics } from "../models/topics";
 import {
@@ -155,5 +156,15 @@ export const patchArticle: RequestHandler = async (req, res, next) => {
     const updatedArticle = await updateArticle(updates);
     if (!updatedArticle) return next(new Error404(`article id ${articleId}`));
     res.status(200).send({ article: updatedArticle });
+  });
+};
+
+export const deleteArticle: RequestHandler = async (req, res, next) => {
+  const { articleId } = req.params;
+  numericParametricHandler(articleId, "articleId", next, async () => {
+    if (!(await fetchArticle(articleId)))
+      return next(new Error404(`article id ${articleId}`)); // at an odds whether I want to now throw or return next (it's the same but what's more consistent)
+    await removeArticle(articleId);
+    res.status(204).send();
   });
 };

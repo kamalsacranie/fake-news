@@ -8,6 +8,7 @@ import {
   postArticleComment,
   patchArticle,
   postArticle,
+  deleteArticle,
 } from "../controllers/articles";
 import { sqlError } from "./errors";
 import { SeedArticle } from "../db/data/development-data/articles";
@@ -18,6 +19,7 @@ articlesRouter.get("/", getArticles);
 articlesRouter.post("/", postArticle);
 articlesRouter.get<{ articleId: string }>("/:articleId", getArticle);
 articlesRouter.patch("/:articleId", patchArticle);
+articlesRouter.delete<{ articleId: string }>("/:articleId", deleteArticle);
 articlesRouter.get("/:articleId/comments", getArticleComments);
 articlesRouter.post("/:articleId/comments", postArticleComment);
 
