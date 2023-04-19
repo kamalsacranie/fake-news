@@ -39,7 +39,9 @@ export const checkNoObjectValuesAreUndefined = (
   object: Record<string, any>,
   next: NextFunction // not needed
 ) => {
-  if (Object.values(object).includes(undefined)) throw new InvalidPostObject();
+  if (Object.values(object).includes(undefined)) {
+    throw new InvalidPostObject(400, JSON.stringify(object));
+  }
 };
 
 export const validateURL = (url: string | undefined) => {
