@@ -71,7 +71,7 @@ export const fetchArticles = async (
         ON articles.article_id = comments.article_id
       ${topic ? `WHERE articles.topic = '${topic}'` : ""}
       GROUP BY articles.article_id
-      ORDER BY articles.${sort_by || "created_at"} ${order}
+      ORDER BY ${sort_by || "created_at"} ${order}
       LIMIT $1 OFFSET $2;
     `,
     [limit, (page_number - 1) * limit]

@@ -32,6 +32,7 @@ export enum OrderValues {
 
 export enum ArticleColumns {
   "article_id",
+  "created_at",
   "title",
   "topic",
   "author",
