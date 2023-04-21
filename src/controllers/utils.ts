@@ -40,7 +40,7 @@ export const checkNoObjectValuesAreUndefined = (
   next: NextFunction // not needed
 ) => {
   if (Object.values(object).includes(undefined)) {
-    throw new InvalidPostObject(400, JSON.stringify(object));
+    throw new InvalidPostObject(400);
   }
 };
 

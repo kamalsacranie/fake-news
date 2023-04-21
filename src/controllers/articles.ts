@@ -38,6 +38,7 @@ export enum ArticleColumns {
   "body",
   "votes",
   "article_image_url",
+  "comment_count",
 }
 
 export const getArticle: RequestHandler = async (req, res, next) => {
